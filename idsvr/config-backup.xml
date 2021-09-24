@@ -1,7 +1,7 @@
 <config xmlns="http://tail-f.com/ns/config/1.0">
   <environments xmlns="https://curity.se/ns/conf/base">
     <environment>
-      <base-url>#{RUNTIME_BASE_URL}</base-url>
+      <base-url tags=" I3tSVU5USU1FX0JBU0VfVVJMfQ== ">https://2c7762d08f5a.eu.ngrok.io</base-url>
       <admin-service>
         <http>
           <ssl-server-keystore>default-admin-ssl-key</ssl-server-keystore>
@@ -13,7 +13,7 @@
       <services>
         <zones>
           <default-zone>
-            <symmetric-key>data:text/plain;aes,v:S.UTVGUTlrVHBtWEtiU0NOUw==.vI9l6GytUGg6Yr4jhLeLJQ==.UnmvpY2Aqm6xgc-EdPUHBdqY8tS1rMw-dOrTt0ttbl3ZqTw0lZuOgwQ5-TmDR0vtzK9Un8sAwxcw9aG5cd-htJY5Zj9-Rms0LBtNflnRmFg=.BOcQMMTX9rNfNUsD0nJDC0uLRlCD8ZHUC4Dqu6Bd2LM=</symmetric-key>
+            <symmetric-key>data:text/plain;aes,v:S.a2FmdEV5MlhkTTltbUxXWA==.-pQibCqUzee6jCu9KFQeuw==.XjFFmmA_N9yoXHZzDJ9kbY2ms68I90viB6VYEI4qAtUA-4SHfMUAjUpIKO8_dripWqDTJYV18L9dNDdGwFzQPLUCvi5E8V-D-N1QKirBZng=.AT6LBtda_EHxyM_q4EXemNkE7ESzIpcfqt0Bdlqhcbw=</symmetric-key>
           </default-zone>
         </zones>
         <service-role>
@@ -25,6 +25,7 @@
           <endpoints>token-service-anonymous</endpoints>
           <endpoints>token-service-assisted-token</endpoints>
           <endpoints>token-service-authorize</endpoints>
+          <endpoints>token-service-dynamic-client-registration</endpoints>
           <endpoints>token-service-introspect</endpoints>
           <endpoints>token-service-revoke</endpoints>
           <endpoints>token-service-session</endpoints>
@@ -40,6 +41,15 @@
       <type xmlns:auth="https://curity.se/ns/conf/profile/authentication">auth:authentication-service</type>
       <settings>
         <authentication-service xmlns="https://curity.se/ns/conf/profile/authentication">
+          <authenticators>
+            <authenticator>
+              <id>Username-Password</id>
+              <html-form xmlns="https://curity.se/ns/conf/authenticators/html-form">
+                <account-manager>default-account-manager</account-manager>
+                <credential-manager>default-credential-manager</credential-manager>
+              </html-form>
+            </authenticator>
+          </authenticators>
           <protocols>
             <protocol>
               <id>default-simple-protocol</id>
@@ -293,6 +303,57 @@
             <expose-metadata>
             </expose-metadata>
           </openid-connect>
+          <client-store>
+            <config-backed>
+              <client>
+                <id>mobile-dcr-client</id>
+                <client-name>mobile-dcr-client</client-name>
+                <no-authentication>true</no-authentication>
+                <redirect-uris>https://oauth.tools/callback/code</redirect-uris>
+                <redirect-uris>io.curity.dcrclient:/callback</redirect-uris>
+                <proof-key>
+                  <require-proof-key>true</require-proof-key>
+                </proof-key>
+                <refresh-token-ttl>disabled</refresh-token-ttl>
+                <user-authentication>
+                  <allowed-authenticators>Username-Password</allowed-authenticators>
+                  <allowed-post-logout-redirect-uris>io.curity.dcrclient:/logoutcallback</allowed-post-logout-redirect-uris>
+                </user-authentication>
+                <allowed-origins>https://oauth.tools</allowed-origins>
+                <capabilities>
+                  <code>
+                  </code>
+                </capabilities>
+                <use-pairwise-subject-identifiers>
+                  <sector-identifier>mobile-dcr-client</sector-identifier>
+                </use-pairwise-subject-identifiers>
+                <validate-port-on-loopback-interfaces>true</validate-port-on-loopback-interfaces>
+              </client>
+            </config-backed>
+          </client-store>
+          <dynamic-client-registration>
+            <client-data-source>default-datasource</client-data-source>
+            <non-templatized>
+              <capabilities>
+                <code/>
+                <implicit/>
+                <resource-owner-password-credentials/>
+                <assisted-token/>
+                <client-credentials/>
+              </capabilities>
+              <scopes>
+                <all/>
+              </scopes>
+              <authenticators>
+                <all/>
+              </authenticators>
+              <client-authentication-method>
+                <secret>
+                </secret>
+              </client-authentication-method>
+              <authenticate-user-by>mobile-dcr-client</authenticate-user-by>
+            </non-templatized>
+          </dynamic-client-registration>
         </authorization-server>
       </settings>
       <endpoints>
@@ -310,6 +371,11 @@
           <id>token-service-authorize</id>
           <uri>/oauth/v2/oauth-authorize</uri>
           <endpoint-kind>oauth-authorize</endpoint-kind>
+        </endpoint>
+        <endpoint>
+          <id>token-service-dynamic-client-registration</id>
+          <uri>/token-service/oauth-registration</uri>
+          <endpoint-kind>oauth-dynamic-client-registration</endpoint-kind>
         </endpoint>
         <endpoint>
           <id>token-service-introspect</id>
@@ -363,19 +429,19 @@
       <ssl>
         <server-keystore>
           <id>default-admin-ssl-key</id>
-          <keystore>data:application/p12;aes,v:S.Z0U4b0Z5eTZVVVRuWDBRaA==.7cqWXyitjeNt-EfB6rmTBQ==.dTuYO1Lhse4amBKVz9M5x1O1M7ORXl1SaoIRBFEKW0KL-Gm8gX59glAAmNl5UqdB_v9JrukSzOvliQrs8sSnfWIBuGDetcReWYRyrNU_nhnNZONC880zG2glpy24Z54GRMXvEOWZpPQj2_8dCD01b9WiTIeqOCUpe9DfT1m9PvhHz8NW8iK7ni2_2oRtUgILN0sArSkybaQlpwcSoYMdZyXDS3osXFlmlY6gVGKtP1riasComtLwd815tUs8VKB4p7Y0G5sSy_3Xx9EJEUQ9RuK9e5dKzv5J5Qov83svSTJzwblYN_TiYZ-XPc1aSfMEHanhQlsCOVXJwU1GYrtUN_jdLECixyQzk5V-d6enQe-92wGkcPPtLkCyS0ofVGxh6hkCDJSF8CjhuC7R9f7_lo0vAoTJrGRhIttHmnbRcL_rdW1tDrQuud63xI09gn2I7ikbH1hIGjMXlq5xm-IkTGcvC-sS6qDj89UDkMTCzugt_Ndsye65uCV5u-lCTLcFnlKp6T_ysM4d2Tstx1apEpbm3zkNbwgEGB7qrRM1es9qUBsaBkVAI0nUJF5Ct0pM_JX2wROXeppR7c4vJ-fMqnqC2rNCr7x63ALj_101q-lduO9l25c4OimktCjvcNdv1c5A00_YDmW9DipQ2WlvCtysl8RKO_7IxP_HTWOHtWASvc77ghXmzeYLtLDc5soWNsLft1jJ4nJMClHovsCwirCMZrzEMzTmJc860J7AIu_bl5ctS26x2aZHCrox4J8TYBAxkdwa0HFnuE1Rc2VAk0YmqmvJ1v-f1KxVK3NhiMHQ-sf-j9oxhN824kCYMV4VqukZMfACxtWbjnwU8YK0IQeT56yYEzuNfzYatdMunXVOw5Y69tAqUY83fqZYkAdigZeTk8kEcSZa3SY5jC6blhlzo_AHwkaHofodCMEa_NgQVJq5wHGWvaV5csu7HK2sKYRs-qKtyAeOr1hQWkkdLgiAZyaHG-1OQQmXF3NF067j4siLxOhu_a1Rdm0vgI2CTwRBX1GS1XO7W5QQ_wxfXRSS0cJoTzF9Rx-0DyhTqwkrOejxBq26DCVLiNGAjRuW8WZOieEXYPuhjl1_N9yLoA9KO2Gmkfix8J15gWge1pvuXBbPFm4ZdAF79fIrEJIJnEES1uOtww5cstS_wVnN3aXkyCQ3E12fIi_ClMq0KCB0dVg4FDAFcAx7L49ZculsuB8UeUoB97aHr-f1rRMiohUFG1jZaA4oplIHBCbqM2bUSTIuAbOUK0pc0rBoDBXA8vp4wzixJ1LGRmKQ5fyLLiTNnh0za8AbYCu0TP5M3q4uBlkFI8Z_cDOMEyjQMUvJ8Ee7S9vuQzPHVSwY75ZEgF7L5qKRhAo_BIuNyZ9OiO4e9xLR17ycLe8arIyP-4Y6lscp61q4Gb48IuowWv38u7FiC8JgdjRXbNj72_09_Plr2g0kwdI7_p5Gg0VJSzdEqYvRG01Bg9Z0VQV-elrcCaRwmc8JHychO9Gi7glORQtXQafww3pCzbZMHphKgLUfoX77sl2t9vz0nhfPmHbv-DpDjBGDjLT5-SNPSIAQkdHSho8qW2lIxkQoWHhsKg12-MA4GbU7fsuiPgzJvEVX391sqkk1pfR99tkwbw0WbYzmdWwBKWbKlRsvZCzg1FVXj3jKGYPuWEBQAZJcw7ABxYQgW1z_Se8Wl9aLtYJLvO2Wvy8uLb21LBaAT0xwDmNA6Yaii2ofjqRhyiTkqRG9qWf9VtRS20Vq1mLOhGTFva2BCmpTzBGauhltcY49pGxvolxqww6m7CPRsRCxD6UeS2EFT0Mud2B-D9lf1hw2NQdpMtapzej_Wd1EYMTYV8g-LUVJn42jh3dkccrdjd4tuR7fZWdWAZV3sWm3CUx4Q7dhV_buzkpRlLin19sxyobi-sA1u_bXl7tBLuRQnHuBcwMlNCx7twuaZEZrJxqMwIgiakq2WDhjaE3cqvunT-rIlUxYtmgWelKL8DZ9QJiYKgQWAWD_oR2X4RiiIf_el3-pqk-ZHazCx7XWhMjuchKBD6BSUEQzpb325-m3sZ9FKcdQeJDYjCaVImgUSCnGEK7DBGIBVaseQrzZNVrhVgVg36TbsMB6BG2eepRB2O-nhKURuowuFe0pJn_aMRRj220HsqxxQE2StbpvxH-4b7lc41Hd9K_x2_vbKv4kw9y79LBmYWzAwqlQslf9e8fJNuUdCqIL0Fhi1nEadiZaX2GWhS4iy0d54uVJwYRTUaliEuQ9WqI1PREBJJqXlKGvYtptmcpQTUs6UVXddHeeOiXuk9ULUNR30i_1I3BWA29nYcPf5cQygt3eAytp9VAWVZB_KCnbWnxBvoA2-zDSv0XtFJN-XQ7TugLY8O3eZodRQ1XVXk-DuT_4UPM9HMevLGQuz5rFRHiGwKOj0AwoU4ZmOZGVZhZwAYSShWjfKVnPM-IN7fM_egpItAnB23T85HC3yQBoX6WwGo2__YkaU_FDMQb3DL5lA6XLHYbo16yTiF_PREfA5mq7kg-S8uuap08hNI180ZrCpfdS0tT6eGEx9p7sX784XaDgSO5WCQ6WyU9LnbpGYLM3lgpFazQzYsrUWRqraJQQSqNTjjzxQyv5w09URMw3vEkZwYPyBNCCKdhaBVnT0SkUGGz-uTvwfa9vZdPDe5EX85AJhW6E3Rc5aC4idf6IsEGSTHqS3lVlyq6eICobdS5upB4dN516B_z6yh1mpww2uWNV3AJiN4y_enFTK07O5655pIwUH4VolPCz6BBHJGkp7Xg-zILYkBE4CLXwx_36hItkWJNdWgribFtnh-oBuwp6xkQwkJiSRZj9xWJGZ0yyLWqW6Tr0JbswV6fyxDQ3wMlfpOpFf37J9hmkg92HP4wvo7h0gr8yOy1Cq945MpAFHKoBbZf2DpnlKKV2ee_wrO7ftUys6RSmVSH3GVAnekVqQGdr_KGb0iFZJMmmley43-PKISDGDGNd0HCs6R1VkmB6MapYk-b-S8_vBUI4X9QoJsMniMDE-NNYCERXSkqKGix7aTVa-H1jAdPJ7PFd7NzvN7Y2XeRNUUjCm49Z4nkaO2Mwxd-LVJ0DmmhqDDy5CkR6Wr_T-oGL0YQ5LBwrVAJY2foA4opdnTfRX5OM7Hq74ferdM7NVHfr8LtnCFsEtprSHrEbKL5fnbe5CESElbAWqz8eYnBCdEQSfu4yZmPIMvusCMhbZH2iPsP1F-xSfaMqhmsXsJRylAsS0FRvg74ecIKXolgdt6xwUB_V019TRtRJDsQeaQ5jIAI_UFauimrnhIt3cy1Daq2i_5tvFu7DavB4cM0yX_9wNl-gG-NIl-l--qBbeI1KvAdSdkSdannuq-EiVN99P1GZUqfud7Up1XqYqND0ZfN22EjuocZlvp_71yMRCAJYfabo9Mwj1F2_EYDJ9T8=.aWmNRTr-HIJ2UArvKzO4wPig6RoXUJjTyuQ-k2v5w1w=</keystore>
+          <keystore>data:application/p12;aes,v:S.S1ZRa08xR3Rtb2wxRjJaeg==.CsMQTZ9rIhFwuoEdMR3f8Q==.ybiDjEQahoai_1mWtk-RTk8Q49KvlJMa7FrDLWMlAg1ikR98QrQY8LUYTBLzKGyhZXWAoIKbtbXBNFlOyWYJmgMlQU4WPMRZf6PTo24NaWzQh9CK439YbOfHjndgiN9j9IgdZRxUl7Uv_DjIQihuynFy8iPcVwcotuKXsRmeSVKU2kQhaJqL4UPgJX2-DY6hXBVAnKAPjSQK5e_FiF7k8xjI0FSfKckIXboI5gEw39TF4x-1etXi2sN8EGFn4eSAxSfPaTkm1Ag-Y8Pc7JZNCVoqNyBlaTXmuAJ8f9jJUExYeOlEjM0MV5YLPeBSaYXDY2pcs0_mYsFko4JMyTJFiiSIsrwj2b5UJMgaSuBmvimA5i-GtVWsLA5b7mnrZc5bQt4TSSvji188go_EQDfW7tM4_xzaovOvv5_7GKEuCDiYdthfdscQd2CrcciAhzMgNcnWquewq5Uo16qxjwqBJw0otq0Z-pi-AYojje1j2e3NmUjJ9rhfvrhEylQnzXxmfAKefF3AkPcrnU3tP7yfMGlsrl6yQT-Ma-oFcH3Cr_MoyzHO8DnKJygbUwiIOBgZFMWRboYrhuGhuRqC4sg00tXa9N-sJTcRhqFwu-4LCWE2IQRk34gNmADVSNFY79PuM2gsAB_pSpGsMx5WaZNbUioE-BTtB8FP9b96RnUuBrpmuIfbpadyFdfEoN9JcUfZzDxdD6gSYz9vTHoBjG0RESG4cUqOvnmybL5IrGE2NuRLmLyGRMGVx2dNdv6_EcoAaNGz4BpBEWJojmQAXZuSPQ8hkHlQ5vZeKm5YLKQxpsK0-AMt0502TFYDm6V1JswoAuZbO2Flx8y0kY376SQqa34A_m1dXZPSJUv3kzzOemHWm7mSI5npdvedGP-yGUwh_0DBFQpoU_fRQ3bAEOcc58jkhMGnhPYRVeLJJ5jQ1-vcxn30oxgdizdv4iEncZd1_rxIPXxowVHUwZIJi0ywcDxQqAngj4olIB1YryyuDGTH1eGW8-JuZe9PsRWxx1_irjggD8_Ue6OJ3yHHaHZD9VTNFdVhVtPySYkM4OMehX8IMdUJAUlK-x9_4l89025-VieBNa2PYXaYN5TaWFVX14RLmIwyj0z-lTeaLXm-suF70anwXklkeSBPiJZAezWvWsWazk0D8SvZOEbf2xjiWtn3lbwVh1F5heUHp7VvC1H2Xh1JDZG1GaqDtZwUFSUmrdN2HMA4DvoCBjOnCrfDE93wgaHXJIHV-KuTjcM82PebJz2o7LNSBTve7F5Ss7eL-gEgiThxMNloOh8mxA4YV_vHOSzV3Azumhs25H-XWH9MWcszuGf1kSotxckCQuaaOkGUA07VRMoMRzZ8eI4VTWEtH4gvdZHkIS6Ohxah63eufBNN6pFp8fxTUzzVO9C0XZNaT3D9QmDh7vku6ksbsVLGW4RB1QUwhtz97UsNxYToet3-nId2NhZBm9n_oii6LJhaY2KdI9bljd0enl18j3MYPQw4ygs7KzbbLkX3Vbw8iof207yxihA9Nw4L0mk5kw9vDORH8IpNCljdTtZWgFwQA0jdqJZiuRNoeI3n5LEa0UI1U_qN_qouY-B8htpuHM8QXJupy1XkWYK7cjBBwshLX8u4lS_eHLqMjFlgWzJaLgGOfRBzB66f8wMkLIGIBsklfQVBYCTOo9iF5iyDzMobiTHx0rz69X929m-LvG6x6Wlwph3tfmFs69vmPOAUk13L5mN4AcU5Tu04LMtq9CZbsXQ3W1NImJHunm-luXqcK1aGennOkMnhoxyg5Up05B_UlHlfBKL0sH8ParPDPuNVdcLIyfIBe5rz4rLFN5a9aTZiQed4DBHkdvqmv9nNFLcWlNQnQgXhB8YWUxn8Y8X703R_P9I5B2l7hLa7EHAltHEOUa6UqAXKPkbq8MWw3OimBhUHM9LMo0G8bCO_mgwN-1h_pp_ngQL2CNgKtZ1ZqLI57_9eAmh5_AIyy_nPQy-XgRfMcCWrT-YwKLIHHxDiy4j5yRVV3DQSZbMJ0_umimDoyQNs502up7OUg9MeQBxbqsVGZ8xC3KojNp1d3ZNSGrfOPRIcoQrOTCsnear6r96Ocg3RkDX6wjSPQsZA5qmp3Mf41TtlAG0xQZXTe8leRZSOei2P7NNPMYpbckbAIYw1469cIdM0KnxQvEAjGIa0ZXoAqujs4TM7y81PKI6bgeK6l1u13rVfCCBVKjFUVmonRgQp502sJEPKWHtTPKaA61AU-TMKj9m1-airsFJkdaa8_9jV1hZ8qoFIkdRFWeHMGTIjs0Phh9gpcOVi3x2cCJf5Tp0MjdXt3G3PnRFF0LrcoEhjS8Akf6maBuJ-oleETziKJwCGbyUIbTueLfhsJjbuMA5T43Aj71LxC-4S3Djqmv3IF3vQ08d9EvW744qyXHSJIgu1MvzZSzYh1p3NEcZVc-aS8A7u7h9HNFORd3cbkOFdK0MUgGMcUWI-I9UmToo16Ocz8FBUK4_23AC8TLsyuwgLJ79PuXZp6w4WSdZXTGhoxlR6tznzRFmnp67QMf3PBraC9OVK49x6h9SlpYiMeE6AfirKHV8Fhq4M_D81shSJZGW7cvBQRT7b_Vk0gKWFpsll2S3-gQXbJ7IoE34DmHzIj0oGcIVkVcO8nHyppoEnQgm-LzLbGOSwvBUBdv93bah2Pmt2T0EKSFTzE_22pqo1neKFlDtUtkmhsKha4xtx5oiHAQD8JEXSU3HymiD2BmvBPIWrOcT1PGvQu95wU5KgPVwYacuOJsFlArWKKi14jxEsaIVK1RN1TYEK3nvLXkkKqssqjnosTJI3G1MYTsd5Kh_Ao6nrFvdDskA2GCcCqgmVr6RfEc4uCXEBIyeGuGgnXR1BBarM1pdFNyTqi4BYeLG2wSSBXPebwmCdDJCu4IaMvRgfzUjF9Qz8AQQCjAewAogZ8Tnodz3f0Us9-l2jjEIP6s5D69eZjVRkzoxLTjSBVN8y3JfmNPM1u8yh4UPwc7e5_orMZGOcpprw22xSP1qexgYgL8ri5pKoOHPBrhSF41yUXUq1JWJlE0Vt95586HxD_w-EkuK4x52Ati5ussGSjx9UQCJBhlWCI6cvsYtvEEhNEduNVPB8ts3G_r32cVz6_q8KY6T4XrRx9AJVZgmbWYQwBBt8s21g_sN0en4_uziZyEak0qKTUxPYHqeZN6PovbfWzxVvNZkkoKdO2srPSs-GdDUlxThfYNOxWIbckwd3AAaIC2fFMCT4yz5OtnhbG5zVuByaZbGrNHoRlN4p4wUsuenHuj9Yp5TNoxRMx8M10WgC-wedyP83C26Z6tt58x7kcwe0YZ0vM0gg_xHQgfP19mt95odrZHtJcg_Ni5cYIEEEmgguzBun8rzG96geRK4k6icbImm2pODW6w2JTPL3aCp7d_B2WWsoNh-KOFh8P3M=.VVy8N1nofzc8QAfqe6qp0IKX3YZuen6vcU86dU4w2xE=</keystore>
         </server-keystore>
       </ssl>
       <signing-keys>
         <signing-key>
           <id>default-signing-key</id>
-          <keystore>data:application/p12;aes,v:S.azFHU1VuaU53RTE2dGc1VQ==.9osoVe26hKq1OG49zvEQAQ==.C2ONSjAdH4ZMnjXmBwVeirL4DO_MNAO4qgHwxAKZpH-CMftvqT-RNPgF1t4a-aLh_O3U21rERv0SInabOiYqkXxhsKLVIU3dA_XZWgn7RnQ5X1zFAE_s6YPjYZO02fzD-yCZl2w6EwpXFDNgZ5OkoOxEwO-1gQyzzxNMAfiko9ouMxx7F1vXzm0jF37FMDA8w76O61VOouZE9-50oDeS7aBsVrPT-TIlkP5IR1QBxDoWFlLk7wuI67xOkZ5TjftKGCaRWHj9U7QY7RLzf6vzo9m13AgLe3_nZA3bU49u5p62d7vUr2QY6mjFDqDZBF-kPykXkH8XWacbPvSDWiMFlnzpf6awa9G2jY1VC_MvS_ED1InaV6ZfRlSIox5I1aKTUucBijAP8Oogazw2cfMOR7DaYXJe6c-mzVzyfOTSgRZzfwFunQUFig0xlXz0ROy9tzc8cM2bBMOwxtZ9mwxBmNzh6A-OtRCYemKzqZT3V413gmjNt1BH0iow-yjjEjakLuaGobOZTL0cvphnKpppMv1ihbn0mwPzNZyZbVM73gM_SlG3XwL91A_EXrwsrFiOMAxgs0ZT9C4c-mPtSv9la0Ppdo0KtsiDk5b7ybmU1KWbPJt3q9IFDVu5XQbg2k1C74tXYUiOxLZ3Lsh-SIU-hAIvoaHu3ruevrrdKnQFgkVIWWrga_ponpiwmqrwWO_ukQa3cuLKskFWW2F7r8SnSMUxbV6Rt9zNxhacMFIb45l-y6t71Xjjn4nt6BRo6wsEGhob9XG75FnevIbAgXA6t47tJGn-2wAr9byvvTqWQIQ4gTOwpKihPLd6FdiVUPMPoKuKCkIvaiNHgGFYPt7w7NP95dbPxE7n_hC345O7TIHbaAfKuiBj1RX-Q5jG_yMri6LLyIbQJwSj_HUjJ_FYpzCLs0kzKhcI_H95oCkHaFebqndni_9g9sctcj-XrABRb7NAwnVdnCu6QjDbrX-PwTDeX89MCOKTryNRzJXrtNw1ahO5kPb0JCMc2RhQN5KhSIWviWjqVGm7v4gIaHYyxNCFEGA6hopbmEUZ9_TKWOaa8FFvbQKYeWubSmkP_vggI4SZPE3b_MqPf5d32v1mSFu52g_i5PwZSJjK76hClpQbsZP1kDOi0nMxzt_UEZu2u-5HBaieSQ-CmxIO8x3FlfpTudw-BlM__lojd5Zh9qeeOYUfmFyqybkZ0x8glr6ZKA-BEgMqbCPO7Ik2X7eut79X2KYWbV9cGdzL_-jqDCthPcYj7sfa2JpECYy0_2SGaSzi2pphbV7zYvKEMs4e-CYJQNyZBpIoA5zEWJjJUB913HfUaKUaBp92VDXy8_3vovJqRM6-qkTrRbX28aRdb40j4eYWgf5oz3V-OZJigL90YeQu8lvuJ3lyjA40jJUQb3O_8ZBXC-Qsopi4lFsTk_aG_OKPtF47A34Jfsvh8pFkKMeZjgsYm3sDtkUr4fjen3QvOAifIeDHHZacGEC7rU6LNPsu_P3iaudnrNYHKcAwCu1Hks4yHyuEEwqTIIXhKlVn62cPwW8lRd5oKxCbyOLOBg_ebIZ8QiD18lN4mcxlPYY5jQNgY7ZwBnDa2mG1BsuF51jk9ISGZK1pwt0XGvnyTjy8gXRHjzWtA6mTkB3xmx0zU19dTuku1ygFVs9QxClKUCGnqOUtb2tv1TCNdyzwmdvHFq2oIvv3ITrAzWb4eF3foZnELAys-yJbPKjZDQHKM5utlW2VW2pHBG2rxKAuPNvznfVvI4nSYOLzY5JiNCT7OK_tldAyMAE7PbuyvuTTOhNEbyonko_jTi-y7LWNAH2-yyGO68fgEcl7kFCaz8NbMaQ7VVuW79ZGh1-tID48PFwX_jvwmcv7obfJhP3OCT9U5RelINesStnIMk9xyEaV7T7ZovcL3je5XTktfRX2q2xCEaRz1Yp46aaKi7yp8iZsQUH-PEkj5oy3wCHoFHY1YFXsRLHNa89WeQ6WWfqM7E2BJg4fnx4AJwDH9QYqo8jIJp2KkqLR_bcxxzpvRxdhagsg0KcRbRElHoAOc2EbECOR-VT4osYBehA35Q11gdsl00ZnmXr_ggEOO6p7Vc_ikkeaDeu7mFrVy6K0vcfYwOxnKNK-oQd6zT_dKgU1sXWrI5Gv9Rtp8D4FxeVZE2aQ0lFpmcIaVuc9ZXIi5BEofX0UvBQsnH_v_W7w5x9LUTgO35b2G-VmKHxJxjKOCEotvz28sRhBY8nLnt_BRg8XXNp7uruJtAuJp2x1Gt1kXGwH1YQzLyexrb_xrjwCpGCozDQQ4A9QPWtC2Kvh90VfY-1VYBphfMsFQR0lNcxCWLOB4ioCVno1kKRBuSo8tcFOMvirUnO_4FAW6vR4UbEnWpNn-S-G-VIlZf6ctJvCryBoAIw7ZAnlocOi10d5JmcptsqbNbQOTnngJT4v0Lzte__sS0Pd6sdo_mCz8TvoD04ubK-ai_wgPwTywBYD3d707SOFjkioj00JPBuaSPz6JukWMo2VnWNre66LWFT8jRghMpAgC-h47_0-AdWIwlarwYUHl9rQOlqWvTdJR7hu5MKxkTMriP1NUNURIr0wwYiYTq4bakTCTxG6zXaKKtWWh0Ums6ntC1BNuk_aStTEAf176fU3UXUwIJhkxN5nIAyg4FkD1f4GyICUvh5Z2JYZl6ryBDAMYS0pMkpNPF6us0Kvfqk6OgMlutGzMKYjaFkc6ic_OdXlEEqOqOiD4cWMLdUBJLajcPZAiQ4ihNzjoBMRF8bSjjBJuliDkNmQRtgWBstlIrYHivXfUo54lLSWm59knFyNkUuDh8GAvZKSp0P0KkpWKl17a0TrgUsT-5nr7Xo15bnr2jmfh4_rijp8U7OW0XX1D808M0qxRbKWiIP9BGvDii2MIqM5vkRtVRBiUhmKawZ_lCSwF2uYcmiI8BWfGABKR9xBBJQkozWFjpCqj70sHAaiSx8rLdwF_kwVEsZ8hkAjlUk0gvfP5iCjTK8G13j8M2TBbJou9Kai28qj8i1yzFb570fST5_Cv9ikUQYhq7aJUl7XAjdPgUd4qjIhACpEArG_Q-Fq2Ab6irrKViK4ZjszPefj4C62v516032wIE6MjxpPwZ7oT0y13y3g1XI00e1HMc4zSR02Di-MhstA2LYN6F82aXklimvp3QTo7VUQZ5vCUyvtVsEGodMgsKpuKY8SyAtvbn-l3JWacVlxZLEwb8MBOmc3Kr85TrRzPy1Bh3WfK8eqD3iKroACEBnsUr_MU2ffEsi5azwrKStlSCH-mfbCVindPng12sPUChC0sk75qlecsqxBrVuTDEttHChZ_iLF5HHV9JaTXDIjV0bO602HEX7PxsTrtEQfy3kfQ0qQeYXiwSf8LPGF5ho6DGNirq8aEXehOgHVv18VxPhtDd-QNNLGG3CMNURbQSXx2wwUvr4=.DKReOrZFHPcgk0pzWd7-xDYJhQwwkixLxHuPObuLvbE=</keystore>
+          <keystore>data:application/p12;aes,v:S.azVoTFgzdkEybmtlQW9DUQ==.iVZ3356tBTCCd6ZfZDXaaA==.XGLZmynT8QC0tE3vBNQcOdYbKaeOLyvGbIGeAN2znW9gKm7a_KbIB0L2YXaOgF1yY_DtTr6_MKc6duBoyzuSPyt0Duh4-j18Klp5FgKBRUfUSVELGiSwt18CdoQTkMrg9ziiRMOFl3TmKlpgHC6f7i1YiELPZ5xOkf5rIE5mc8AfE5OGZ1nZK_5hbk_QuYvbOHdQC6OHD7m4g4Luw3NbezyMdfE48x6rNMPaI-5o2uORJdGZd-khO-UqHPaqtfOVWuuTbLYq05I0CdUMjqOsoBp1TCu22iFEZ0fFWMiuOnLMI9T3MKCeLoZXnpZkApOB9p2zBKMJl6Babdz9G6sAhZY2I1ZRdOpIn5A4dYxUte0k4mVtfiJTIMmcSUDrbgAdgDc_CS7wMqRQpZGS_g1BsINHYQF1-Bvc_LHxkiAuoLfHpwhkKwsEvtZMbJQIGqS9unV0t_q9zq-qnuDu2rAvAdj88TACieBZ3V_JpDtlVquUp-VIy18UtJLdnc4wUgzofA9ewmRE5lux6CDdSgtYSs_HY7Drtks6oYUQssVy5QZl9SxyMX8TGLOV8A4J4Rz5igLFaaIlQ0ViYU5OURMN-G2mmww3kVfiRqlZtqfnlU7-rkkp0iA-Q1naK5IpiA1meWpwU1EHQ8V49ZrzUd_dted9rWUG_l5U67EpY8M86K-H6gs_LII_1iLZrzSEkodZ1cIRSsX7EQxSp8IRNXQD460weI6b-pP2wTm8gpAdza1LwDRAZvpUg4IPeRJBFYQkelki94X8hFDe9diR-0yA6c1csTXSmHrlA_PuzsFWK4YaITJ_oLd9QkWH_olEPI5xYuJS-9WvUMh6qQsFs5DP3UTMcfZ6JGhaYCzLicvKALItP6s4lFNAt-0lFQM8_L__iC_kizHalYsrXDUiBF4bncC3cRqqoQRvKEne6HRXrGqwlUwhIAKhFNF0UUvFXj48mayOUjFkdpLCkTAh5E8PO4OZENwj_HTDMTPQ6C9QYvabmPdX2hjb6QXdQMwcB5978qihqJbof0iDJ41sJ9_9IbSTApZUp-YjPSw6jYXBFz27jotkP5wfvhGokpD2XmoHOXlpILkIorbf52AOZTmckcitKxrBylcXnzNB1-6nKMTB3yEAUbJNLYqHvdJl88F8zeHujOhUyc5vtwk0e9b-0vlszuaBd_dFsYk3yvjEQJnjsG3UNuE-gCowXHuDx4PawWfrOG93L5w9DZLmvjZh2xe60iI7lTnV3vBp8RLMANAXqRJZt6IZnuS_F6nqkKamqhqVk-1QXVH93176IOPjAYmhYiBosQPyDn7PkasmiBYLrM6-Bmch7J1hE97DR3iBYxZav_H62S6y8XjxmsuYFy3OhcMO6rADfKV-gfTh7q0fd0r7Hoq1_2mwrfpXMluus14biUZ3cyLRqT7SjUjKgXCUuBBGB3hPgPALwyUqj2bdAY59ihG03vlPoAsxSbZ9mZPLbWtIX8HE_99SJ_M3XD-qHG3901ob1uSocAsscpYbUbvNAPRlcsyFQ1D3QQM51Sced0HJ3iuOlT_w-CJEc-rGM4w2OXIIdoFAcysFykwJh8nIqSJ1rOHZ8kmCMjQ92s0sPBZw0LCrt55g_W9l8GiZziknqAykMujkD4IpwqGPYuOvT1kcKhrNi76LlDpuR0_axuoXUXzK7UB4LmW9NBSJzLKjAmAOZXuHL3XWRgbcqPCYWfv5vSeKaFkJxthUdZM_2-qt4nqlEM3ijDBVnMlZYXnS6_gW_SmOL6i6at73mhWOva_shVHWdnEXn3k6k7Mi7vkVwZ_va_pB41qt9BnVhEO82KQ7-NmoS1XQJlubkihZLzElbaZqHtYwpfqtt95S7-OM61YpmbQvCJi69xmJMW_rJttyVDkytvggAusbtBt3TDigey563SneGbF35rGMhC2dXsk3p5oq5dRLqYFsFO0Bpd9ZcM0i-khUwrfPGs7bfFBEkJg-6n4E08ftmqbFc8iJ0YQb_HaMQyPgOk5js1LV3mpTksEcSPrQv18UotFEJ7toZBjSUj22cr6sdV2VMYAEectHqIoj6eWKNJwK-cEmodFICnk9E3ubm6QAzzUqJptR52B0fLIs0sRd6U1nshtuo-aRMaBx-T0efEDn-Y-y0hPeUOS_SxE6W16ROCgF9nmsV-d7aQql330vifv-R_e30-_43IYz1TVgLhZg8nuO7gAEe7GsKVOp4D7SlAk5owHrrP88XHqPwm0ePX94_-cZP1N2i2MeDEAYxo5IOvz5A70wvsJGlTgTRNY7LwR3_zZH5Cuho5HaQzks6m9pnijwiRtBBszMAZh8FNiR6JtAceh9zgO-c-Dqu_xCCI05cgoQEBik0Or5E8Y6tcTafcNApIPxXV5aRObtlC0OJWt2RhsBUkPxyihryWmxIq6p_ADMgk-5xkIveFffehSoP6embcfBOHVyHBiL50ra0gRu9Mo_7vntZHv684rsRdH4axNJRMtV25XV7KPBWp9xZOapzxEh99_7nyCsuF2ipbhxzQwUlmIi2Bf32UQTehNsVRK82xjdvQdPe7I5rxwFodwiWrVt0iq8-wH52S4ZxR6QPHdFnHNJjXgFGfG2XvJT9avbXCRqwkgrvrUTuXzmMAEzfFr1vZXSwbZdD6WLGy8Veir8SePuVUJmWKrXz2ytr2oxU-yTvOpi4hi4F-xxBKVzBvyPxo-h10KDphb68yuCC20US5BNychu9YHBOwaZU164Xd3HFkJFvAuhjnN6aRIqngwCLF2vjzEQMlRqeqtST8WwSckt6DjHmAmAg3xPMqEoUZebe6d7pDaSHiQOBC1y7qkmr6X2Z-3XXJ7-dm2O4IOvEXaJg-4dfUw2P58K1cJKNh9ZB_vopFtfJTr_UFv7g5NBf6mpIo_KvkdTdjBg6gduYEsGGTx0H_FZRpSfq1L28OUUnggITerbCt3YTfwcTfEA-UO5Bt9cg4xm0TPR11K0hO55jFtkj37GC8CuOh40cnsiVnr40WGxgQUnKN1Fni2-_AKPWXVh-E61chDlDcFQnnaD-BkK8_At_lzpF16fVzqJmSqS2_AdFE4rlSRPF_KeiveuT0ckpX6iuIpTgZLpNtOsLbKQBWCawScTCy2bLjSYzqMgj12bSiT3gA7uqh2NsK64ASWEtPruQBnY99KgHA6jk8Gon5SLuBHJFLGGEO6lyZkKplJH3H0EnqL45YKX6C1tDBbpbzU7LmnbzOq3HxSQ31Ch4zTkuPqfbf_pQDIEAtnMhzHwEUjygfvwZVERbH23JKgfty3a6LVme28aQVmsVzgNGdDpE4GjE0EXqtY5XF-Oxk9sEBp0h5prLg_wdASGQkXP2Pa7XLQpzC1-1tN1JIb30OGT1Zi-f2rQkwUogDLJpj8RF4TF8aOM1SVjN3hO_pE5_nlI1rBoVQCwEm8mtnQAO60=.j3m6a9u_PkyVADd1pJKZH_tvAXUlLbwE8PCHX6gzsf8=</keystore>
         </signing-key>
       </signing-keys>
       <signature-verification-keys>
         <signature-verification-key>
           <id>default-signature-verification-key</id>
-          <keystore>data:application/pem;aes,v:S.SnFSdWNPTlpqWVlYZWRKZw==.i5bXF8flPzannVjVfInR4A==.2wka7nJ6niiuypO_vaUBFJzsAbCUVGXzYxSTRFttbMITcye6UPqO0-M7bQ1kkFBTlwq6leJIO48clVMCVcOYvSrJJgrUW4RzjromZYeoXj9fub-3pRiigggxM8iJ9SkqTvfrJ0y10KM814H8Jg9eDA_OwBjqCyJOPh5qJayXp2jkw-caHeypnRsgmwNCW0Hh62XAGvFuWu3AwiMzvaoslyqIuRL0Cw98wrRa1qc08FanhEqmVOMJJSvo6wZ0J0d69rAWYU70wanTbFixRuR6rXobxaGB0z6JMht2a9_mkh_1zINX7gUmVd9jqjixMZOL2oFkppoKNoVVtWzkfr6BcnVddQQIq7kaodPiQghKft5-vF2HtW1Mj3x2pCeJxBlSFo3Ipyz1cGDWrtEDyKz7fN4uzA1BKjzgRQkxhJXawiPCA47oKb8eER6nAm7-zqhAfhknYN-HbBx1lsYR1YrF6giiP6ZT12LyF-PJYSrculP7vGnNDLOZysucCshWqbwQ5w9odYgRHL0w0m1irBTIuD81x-L71EtztvjOTFf48yp3Y17gkTIBw9nbpZziufqIN7quCWEBqzjtnreQI4_xCCLACQ_YusO1-MZguPeYnT8z0dmmWMWRlXwrYfVGklG1HgRxApHzCnXeezLntvE2iDcxm2MTgd3oQkIxd0NPodn9EwfRpdHR1jJhAHnvnxOg3jl1b7GL5oXt91y9Dg-SBPn7Us4TZjSnh1QE797e48ndbXAHmVihIATPWZaOeT_Zkoqi1b77ysDTf00Dp5v-b_9C-HSWheuHVnDOvBk5jOtIUZFoOy0UNOFRdjiVikb1OVCAaVV2Li3Xsy9Z_KRqfZoYV-5MwyWnX9r8pXe7EbmZbqRBrY6NJh1z16O5fUTuye48uIFAWvXIfVPwAmJL6dzZlV1llsbpGB-TpzLjB4OBZ3iYRmyiRQws7tgeXpGWvMsE6yl9kbYBSENjqszTTsxbWERWHul6ZnJXg3mZ-vHsYYyUt9gJR2eaLhoDEe7lIt90KHTv_5tesbkT8078TnDue7mjPo4Zea8mNdG5rr0-xu6dvqu1s4Toh833UtVgt6mUhXPb9e-3dj88f_r-TVy8LjYD5Crvx0l89sbKZHUzGrVGpCazn5SM_dOlRn7KoWnqOnwuSvbUnDtbC1n8zAK4iTooR2GXG1YFT6fPC3NCxpsbeP43taYHZGEt3RAcfZRO8Pm-Q8REERWna0GWjtnaYYzXcE-dJYAp1axIgTUFoVlTBXSBIF9HVseIBBnQ13dTRykCcAu3OKlvqrLfX2TXTvnItxh_MuueBHQxXP_HhaEgIYVbGRrwiwDWwpmeIX3sMJlTML3N6uBHjpiDXt-qTFz1zcvYg63kjbp1WkdiWuif_33jzI8WRhJ2lVXOLHnFXLDJ7Tm1WGXFloJjNSSJ-WOGcUjJ5bJshhl5-gN4eWdL9mWv8HOvpQi6R2Tpfv03A7KUcvAg12J42h_a9zDkfsuYOwNcPggZYpIKbECYOgG_EX855Zu0BFw1B914-ZyOrauYFAjFJ2TBiJwzl-MGKULJOtRgJKBcseBXTcxyulKUdnzfEJ4GSbyZTReKj9hsRPd1LZxCkVGvZ45cMLozqoDor-XKINkd4fj12HeZoFC-n2j9yTH5tBY2Nxms.UMGJ0qBf5RTEaXUNl5RQBJSQe5qH54wPoYdMi5homfA=</keystore>
+          <keystore>data:application/pem;aes,v:S.enRMQUFGR05SVVNPVkZwcA==.lPaNBo2pHQxMIw-t0xTq-w==.06DKbw9-BA-rq7oLaZ_Fxcq0wAKJYXOLY-wxE9rQLjMcmgIqEBuExD3c-IaHrlqVtkRdNYourHO3JAOKZah3Z3rHHuleXJjwLqBm0mMaVWVBnKxBmMlwenQdd0KbnMBbzsUZr4P6K4GHwyF0Z4rb5gQLuy97rXuOvzb0U6HEIlilyDmd4_8qP-BNv5NO08gph7LBs5tGEYoCKzDYctdGCkC8oE4a53XSRhXPvBGyjD1Sd6MNnErUdnwphS2ybre6VTTzrMVscV-P0WtlBEIjY153bf3Oewj_WAjljy_ntmvBpQZVRivIObZoIZ6D_fXsCCVGO25RSy5J_VLlxnI0nulZMnLTxUJMTKez3UUprBLRXaQPSB1-25az21apbmgmcvlhJf_RVVrtEIiMz78h0bBqQDtCLf1PnRq2LZZMLuucxN1gMmHrSNldhcZOV8qBitpPrv5ISMjauC1Go6MCEpa9CBDx-eZEYiaV0khPOJiv3vyQYWQxas2VZQ0HHS9ZUFZPUf9OtqP57ConcdpXn601Yyen6ww-H5cHaXXHj_snccVMYp3tDzvUEluJHJT24vsX1Aa13260yZ5WTlyun3Ys9zGDtCtie6LaV8WgYId0emxOsJBx3rBS24UN92FN8lozMM22nUAbkjQgt50Z_4gQ2Io5uyDTCi6eP_emk35jjbFtoDiNGujNuUYbfBvruUD-PFFGuC_qfUlvVzSk_sWUfn3HVjN1FsuUADg__CVlJdJBJu1kEYhXL2riVwkNkBlJ6coW7QuANq9tZ7YYsRzg09sWYxamlxRzdQY4DvJZUsvgQk_EFPXGt2shlb6GrU90uLLP1qtTzABcRFio0i_9CmvpK3KFZeFhf1e5xU7qdd6NxnnoXM3EmOyYzGTL4g8viYAFvz87jFRN92AFLkb5E_L8hJtQpJMLMeOByPcXcD_31TG5z60_3Xis7CNLBOEjU8g0_y3a7wfYoi7VKgGNtZpNovtmA95P-7DvQgSSugN9qR1mFzGyb9Ys43--ARn-OyvLVJqZnlg7RBibiE0lcNJi2SIEqVeHgnd0XB9F_R2a3rOy5iZbH5nwybOFxSjCrrw7bxk4xd8CNep_ZAfwVtFK_BXf10szWQIVLUfaqODB3rd1phb0f-FWsiwsXPhFPxCo_CWM3xC0QjmUq5s74FxNvIQScD982Ah3jZEDH4uMBwQB8Qzmlm36PZ-_G-vPxb6tV-A8a5it9r2rGc5UzVIGhriqKB9GJoII_6CMptQW4ETkBmNzqtTBY5F4l0pi923QsdN1WRvGyezjqlX6bZrq5M91P4S2YxtWaeiUNncUVytj6DqheE2z0u99HoiAu_Ry_PbJff_BLQY_MVmpe45RaupuL_47x8t0kEY1hCeKT-BiI3UUsSnyG3Y_la_KV2eLY_lJpvkZD6qEkWHXJT4ad_hAAG9_t_w88sA1rxBSiU32rc1ay6dAN9tQcMEdzRmY2FfNJ10XKbJVl4IuqKKTi95--67ICLefouoBNpizS8SXiTB9yNkreOQCVydPIi5t39YjrLSVk3A7kgeDQLUcqQfO6kbjK95c7iZ6rlEJIEeRXehBU65mpDQeH6PMCX3fGmHtRTbFqK_XGT8Y1wmTP1eyGqcWISbHruWmGAxR_aiE4z7l9kZOvg7N.rB2hRW3nIjFSCi15kPxj6T0H9_yI4KsCsHeFZb_mejM=</keystore>
         </signature-verification-key>
       </signature-verification-keys>
     </crypto>
