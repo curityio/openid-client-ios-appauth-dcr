@@ -1,0 +1,7 @@
+1. Do initial configuration, back it up and redeploy
+
+2. Configure authenticated DCR
+
+3. Copy in the app from the existing repo and get it building, then check in
+
+4. Swift code to spin up
