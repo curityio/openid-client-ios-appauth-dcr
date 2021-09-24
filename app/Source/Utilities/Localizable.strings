@@ -1,5 +1,5 @@
-"main_title" = "Curity AppAuth Demo App";
-"welcome_message" = "Welcome to the SwiftUI AppAuth demo";
+"main_title" = "Curity DCR Demo App";
+"welcome_message" = "Welcome to the SwiftUI Dynamic Client Registration demo";
 "start_authentication" = "Start Authentication";
 "subject" = "Subject";
 "access_token" = "Access Token";

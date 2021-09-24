@@ -1,5 +1,5 @@
 {
-  "issuer": "https://6b28e8fe4b3d.eu.ngrok.io/oauth/v2/oauth-anonymous/.well-known/openid-configuration",
+  "issuer": "https://f71d1f07be68.eu.ngrok.io/oauth/v2/oauth-anonymous",
   "redirectUri": "io.curity.dcrclient:/callback",
   "postLogoutRedirectUri": "io.curity.dcrclient:/logoutcallback",
   "scope": "openid profile"

@@ -40,13 +40,15 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Update the mobile app's configuration file to use the NGROK URL
+# Update the mobile app's configuration file to set the issuer / authority to the NGROK URL
 #
-DISCOVERY_URL="$NGROK_URL/oauth/v2/oauth-anonymous/.well-known/openid-configuration"
-MOBILE_CONFIG=$(cat ./app/config.json)
-echo $MOBILE_CONFIG | jq --arg i "$DISCOVERY_URL" '.issuer = $i' > ./app/config.json
+cd ..
+MOBILE_CONFIG="$(cat ./app/config.json)"
+AUTHORITY_URL="$NGROK_URL/oauth/v2/oauth-anonymous"
+echo $MOBILE_CONFIG | jq --arg i "$AUTHORITY_URL" '.issuer = $i' > ./app/config.json
 
 #
 # Also output the URL, which can be useful to grab for development purposes
 #
+DISCOVERY_URL="$AUTHORITY_URL/.well-known/openid-configuration"
 echo "Identity Server is running at $DISCOVERY_URL"
