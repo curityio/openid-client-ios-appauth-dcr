@@ -1,2 +1,8 @@
 .DS_Store
 idsvr/license.json
+xcuserdata/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+build/

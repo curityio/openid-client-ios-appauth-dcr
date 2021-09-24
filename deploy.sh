@@ -13,7 +13,7 @@ if [ ! -f './idsvr/license.json' ]; then
 fi
 
 #
-# This is for Curity developers only
+# This is for Curity developers only, to prevent accidental checkins of license files
 #
 cp ./hooks/pre-commit ./.git/hooks
 
@@ -30,10 +30,6 @@ if [ "$NGROK_URL" == "" ]; then
 fi
 
 #
-# Update the mobile configuration to use the NGROK URL
-#
-
-#
 # Next deploy the Curity Identity server
 #
 cd idsvr
@@ -44,6 +40,13 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Output the URL which can be useful to grab for development purposes
+# Update the mobile app's configuration file to use the NGROK URL
 #
-echo "Identity Server is running at $NGROK_URL/oauth/v2/oauth-anonymous/.well-known/openid-configuration"
+DISCOVERY_URL="$NGROK_URL/oauth/v2/oauth-anonymous/.well-known/openid-configuration"
+MOBILE_CONFIG=$(cat ./app/config.json)
+echo $MOBILE_CONFIG | jq --arg i "$DISCOVERY_URL" '.issuer = $i' > ./app/config.json
+
+#
+# Also output the URL, which can be useful to grab for development purposes
+#
+echo "Identity Server is running at $DISCOVERY_URL"

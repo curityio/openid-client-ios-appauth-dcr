@@ -18,7 +18,7 @@ Deploy the Curity Identity Server with preconfigured settings:
 ./deploy.sh
 ```
 
-Run XCode 12.5 or later and run the app on a simulator or device.
+Then open the `app` folder in XCode 12.5 or later and run the app on a simulator or device.
 
 ## User Behavior
 
