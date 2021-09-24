@@ -1,7 +1,10 @@
-1. Do initial configuration, back it up and redeploy
+1. Configure DCR and get old code sample working + checked in
 
-2. Configure authenticated DCR
+2. Get ASWebAuthenticationSession window working and implicit flow messages
 
-3. Copy in the app from the existing repo and get it building, then check in
+3. Move on to Android
 
-4. Swift code to spin up
+4. Strip down old code examples
+
+5. Update mobile website articles and split into Basics + DCR
+   Do this after Token Handler Pattern resources have gone live, for reduced merge conflicts
