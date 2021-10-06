@@ -1,15 +1,16 @@
 # AppAuth with Dynamic Client Registration
 
 An extended AppAuth sample using authenticated Dynamic Client Registration.\
-This improves the mobile app's security as detailed in [Mobile Best Practices](https://curity.io/resources/learn/oauth-for-mobile-apps-best-practices/).
+This improves the mobile app's security as described in [Mobile Best Practices](https://curity.io/resources/learn/oauth-for-mobile-apps-best-practices/).
 
 ## Code Example Article
 
-The [Walkthrough Article](https://curity.io/resources/learn/resources/appauth-dcr) explains the complete configuration and behavior.
+The [Tutorial Walkthrough](https://curity.io/resources/learn/resources/appauth-dcr) explains the complete configuration and behavior.
 
 ## Prerequisites
 
-First copy a `license.json` file for the Curity Identity Server into the `idsvr` folder.
+Ensure that Docker Desktop and ngrok are installed.\
+Then copy a `license.json` file for the Curity Identity Server into the `idsvr` folder.
 
 ## Quick Start
 
@@ -22,6 +23,11 @@ An ngrok tunnel enables mobile connectivity to the Identity Server's endpoints.
 
 - In XCode 12.5 or later run by opening the `ios-app` folder.
 - In Android Studio 4.2 or later run the app by opening the `android-app` folder.
+
+Sign in as the following preconfigured test user account:
+
+- User: `demouser`
+- Password: `Password1`
 
 ## User Experience
 
@@ -39,6 +45,21 @@ Once authenticated, the user is moved to the authenticated view.\
 The demo app simply allows other OAuth lifecycle events to be tested.
 
 ![images](/images/authenticated-view.png)
+
+## Manage Registration Details
+
+To see the details of the registered client first connect to the Identity Server's SQL database:
+
+```bash
+export DB_CONTAINER_ID=$(docker container ls | grep curity-data | awk '{print $1}')
+docker exec -it $DB_CONTAINER_ID bash -c "export PGPASSWORD=Password1 && psql -p 5432 -d idsvr -U postgres"
+```
+
+Then query the details of the dynamically registered mobile clients:
+
+```bash
+select * from dynamically_registered_clients;
+```
 
 ## More Information
 
