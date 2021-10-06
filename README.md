@@ -3,7 +3,7 @@
 An extended AppAuth sample using authenticated Dynamic Client Registration.\
 This improves the mobile app's security as detailed in [Mobile Best Practices](https://curity.io/resources/learn/oauth-for-mobile-apps-best-practices/).
 
-## Walkthrough
+## Code Example Article
 
 The [Walkthrough Article](https://curity.io/resources/learn/resources/appauth-dcr) explains the complete configuration and behavior.
 
