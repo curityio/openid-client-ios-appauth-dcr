@@ -1,10 +1,10 @@
-# iOS AppAuth with Dynamic Client Registration
+# AppAuth with Dynamic Client Registration
 
 An extended AppAuth sample using secure dynamic client registration, in line with [Mobile Best Practices](https://curity.io/resources/learn/oauth-for-mobile-apps-best-practices/).
 
 ## Walkthrough
 
-The [Swift Authenticated DCR Code Example](https://curity.io) article explains the complete configuration and behavior.
+The [Authenticated DCR Code Example](https://curity.io) article explains the complete configuration and behavior.
 
 ## Prerequisites
 
@@ -18,7 +18,8 @@ Deploy the Curity Identity Server with preconfigured settings:
 ./deploy.sh
 ```
 
-Then open the `app` folder in XCode 12.5 or later and run the app on a simulator or device.
+- Open the `ios-app` folder in XCode 12.5 or later and run the app on a simulator or device.
+- Open the `android-app` folder in Android 4.2 or later and run the app on an emulator or device.
 
 ## User Behavior
 
