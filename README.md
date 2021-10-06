@@ -31,7 +31,7 @@ Sign in as the following preconfigured test user account:
 
 ## User Experience
 
-When the user first runs the app they are prompted to register, which requires authentication.\
+When the user first runs the app there is a prompt to register, which requires authentication.\
 This gets an access token with the DCR scope, after which registration request is sent.
 
 ![images](/images/registration-view.png)
@@ -48,7 +48,7 @@ The demo app simply allows other OAuth lifecycle events to be tested.
 
 ## Manage Registration Details
 
-To see the details of the registered client first connect to the Identity Server's SQL database:
+To view all registered mobile instances, first connect to the Identity Server's SQL database:
 
 ```bash
 export DB_CONTAINER_ID=$(docker container ls | grep curity-data | awk '{print $1}')
