@@ -20,10 +20,15 @@ import SwiftCoroutine
 class MainViewModel: ObservableObject {
 
     let appauth: AppAuthHandler
+    @Published var isRegistered = false
     @Published var isAuthenticated = false
     
     init(appauth: AppAuthHandler) {
         self.appauth = appauth
+    }
+
+    func onRegistered() {
+        self.isRegistered = true
     }
 
     func onLoggedIn() {

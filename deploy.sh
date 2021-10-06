@@ -43,9 +43,9 @@ fi
 # Update the mobile app's configuration file to set the issuer / authority to the NGROK URL
 #
 cd ..
-MOBILE_CONFIG="$(cat ./app/config.json)"
+MOBILE_CONFIG="$(cat ./ios-app/config.json)"
 AUTHORITY_URL="$NGROK_URL/oauth/v2/oauth-anonymous"
-echo $MOBILE_CONFIG | jq --arg i "$AUTHORITY_URL" '.issuer = $i' > ./app/config.json
+echo $MOBILE_CONFIG | jq --arg i "$AUTHORITY_URL" '.issuer = $i' > ./ios-app/config.json
 
 #
 # Also output the URL, which can be useful to grab for development purposes

@@ -1,7 +1,7 @@
 <config xmlns="http://tail-f.com/ns/config/1.0">
   <environments xmlns="https://curity.se/ns/conf/base">
     <environment>
-      <base-url tags=" I3tSVU5USU1FX0JBU0VfVVJMfQ== ">https://2c7762d08f5a.eu.ngrok.io</base-url>
+      <base-url>#{RUNTIME_BASE_URL}</base-url>
       <admin-service>
         <http>
           <ssl-server-keystore>default-admin-ssl-key</ssl-server-keystore>

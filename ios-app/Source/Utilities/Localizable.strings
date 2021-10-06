@@ -1,5 +1,7 @@
 "main_title" = "Curity DCR Demo App";
-"welcome_message" = "Welcome to the SwiftUI Dynamic Client Registration demo";
+"unregistered_message" = "Perform an initial login to register the app";
+"unauthenticated_message" = "Authenticate to start using the app";
+"start_registration" = "Start Registration";
 "start_authentication" = "Start Authentication";
 "subject" = "Subject";
 "access_token" = "Access Token";

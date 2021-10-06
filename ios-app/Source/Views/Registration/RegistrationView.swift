@@ -16,46 +16,44 @@
 
 import SwiftUI
 
-struct UnauthenticatedView: View {
+struct RegistrationView: View {
     
-    @ObservedObject private var model: UnauthenticatedViewModel
+    @ObservedObject private var model: RegistrationViewModel
     
-    init(model: UnauthenticatedViewModel) {
+    init(model: RegistrationViewModel) {
         self.model = model
     }
     
     var body: some View {
-    
-        let authenticationDisabled = !self.model.isRegistered
+
         return VStack {
-            
+
             if self.model.error != nil {
                 ErrorView(model: ErrorViewModel(error: self.model.error!))
             }
-            
-            Text("unauthenticated_message")
+
+            Text("unregistered_message")
                 .labelStyle()
                 .padding(.top, 20)
-            
+
             Image("StartIllustration")
                 .aspectRatio(contentMode: .fit)
                 .padding(.top, 20)
-            
-            Button(action: self.model.startLogin) {
-               Text("start_authentication")
+
+            Button(action: self.model.startRegistration) {
+               Text("start_registration")
             }
             .padding(.top, 20)
             .padding(.leading, 20)
             .padding(.trailing, 20)
-            .buttonStyle(CustomButtonStyle(disabled: authenticationDisabled))
-            .disabled(authenticationDisabled)
-            
+            .buttonStyle(CustomButtonStyle(disabled: false))
+            .disabled(false)
+
             Spacer()
         }
         .onAppear(perform: self.onViewCreated)
     }
     
     func onViewCreated() {
-        self.model.registerIfRequired()
     }
 }

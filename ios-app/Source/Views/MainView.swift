@@ -19,12 +19,14 @@ import SwiftUI
 struct MainView: View {
 
     @ObservedObject private var model: MainViewModel
+    private let registrationModel: RegistrationViewModel
     private let unauthenticatedModel: UnauthenticatedViewModel
     private let authenticatedModel: AuthenticatedViewModel
 
     init(model: MainViewModel) {
 
         self.model = model
+        self.registrationModel = RegistrationViewModel(appauth: model.appauth, onRegistered: model.onRegistered)
         self.unauthenticatedModel = UnauthenticatedViewModel(appauth: model.appauth, onLoggedIn: model.onLoggedIn)
         self.authenticatedModel = AuthenticatedViewModel(appauth: model.appauth, onLoggedOut: model.onLoggedOut)
     }
@@ -38,7 +40,10 @@ struct MainView: View {
                 .padding(.top, 20)
                 .padding(.leading, 20)
             
-            if (!self.model.isAuthenticated) {
+            if (!self.model.isRegistered) {
+                RegistrationView(model: self.registrationModel)
+            }
+            else if (!self.model.isAuthenticated) {
                 UnauthenticatedView(model: self.unauthenticatedModel)
             } else {
                 AuthenticatedView(model: self.authenticatedModel)
