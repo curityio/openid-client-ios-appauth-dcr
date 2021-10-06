@@ -70,60 +70,13 @@ class AppAuthHandler {
     }
 
     /*
-     * Perform dynamic client registration and then store the response
-     */
-    func registerClient(metadata: OIDServiceConfiguration) -> CoFuture<OIDRegistrationResponse> {
-        
-        let promise = CoPromise<OIDRegistrationResponse>()
-        
-        let (redirectUri, parseError) = self.config.getRedirectUri()
-        if redirectUri == nil {
-            promise.fail(parseError!)
-            return promise
-        }
-        
-        var extraParams = [String: String]()
-        extraParams["scope"] = self.config.scope
-        extraParams["requires_consent"] = "false"
-        extraParams["post_logout_redirect_uris"] = self.config.postLogoutRedirectUri
-        
-        let nonTemplatizedRequest = OIDRegistrationRequest(
-            configuration: metadata,
-            redirectURIs: [redirectUri!],
-            responseTypes: nil,
-            grantTypes: [OIDGrantTypeAuthorizationCode],
-            subjectType: nil,
-            tokenEndpointAuthMethod: nil,
-            additionalParameters: extraParams)
-        
-        OIDAuthorizationService.perform(nonTemplatizedRequest) { response, ex in
-            
-            if response != nil {
-                
-                let registrationResponse = response!
-                let clientSecret = registrationResponse.clientSecret == nil ? "" : registrationResponse.clientSecret!
-                Logger.info(data: "Registration data retrieved successfully")
-                
-                Logger.debug(data: "ID: \(registrationResponse.clientID), Secret: \(clientSecret)")
-                promise.success(registrationResponse)
-
-            } else {
-                
-                let error = self.createAuthorizationError(title: "Registration Error", ex: ex)
-                promise.fail(error)
-            }
-        }
-        
-        return promise
-    }
-
-    /*
      * Trigger a redirect with standard parameters
      * acr_values can be sent as an extra parameter, to control authentication methods
      */
     func performAuthorizationRedirect(
         metadata: OIDServiceConfiguration,
-        registrationResponse: OIDRegistrationResponse,
+        clientID: String,
+        scope: String,
         viewController: UIViewController) -> CoFuture<OIDAuthorizationResponse?> {
         
         let promise = CoPromise<OIDAuthorizationResponse?>()
@@ -138,10 +91,10 @@ class AppAuthHandler {
         let extraParams = [String: String]()
         // extraParams["acr_values"] = "urn:se:curity:authentication:html-form:Username-Password"
         
-        let scopesArray = self.config.scope.components(separatedBy: " ")
+        let scopesArray = scope.components(separatedBy: " ")
         let request = OIDAuthorizationRequest(
             configuration: metadata,
-            clientId: registrationResponse.clientID,
+            clientId: clientID,
             clientSecret: nil,
             scopes: scopesArray,
             redirectURL: redirectUri!,
@@ -185,13 +138,15 @@ class AppAuthHandler {
      * Handle the authorization response, including the user closing the Chrome Custom Tab
      */
     func redeemCodeForTokens(
-        registrationResponse: OIDRegistrationResponse,
+        clientSecret: String?,
         authResponse: OIDAuthorizationResponse) -> CoFuture<OIDTokenResponse> {
 
         let promise = CoPromise<OIDTokenResponse>()
 
         var extraParams = [String: String]()
-        extraParams["client_secret"] = registrationResponse.clientSecret
+        if clientSecret != nil {
+            extraParams["client_secret"] = clientSecret
+        }
         let request = authResponse.tokenExchangeRequest(withAdditionalParameters: extraParams)
 
         OIDAuthorizationService.perform(
@@ -211,6 +166,55 @@ class AppAuthHandler {
             } else {
 
                 let error = self.createAuthorizationError(title: "Authorization Response Error", ex: ex)
+                promise.fail(error)
+            }
+        }
+        
+        return promise
+    }
+    
+    /*
+     * Perform dynamic client registration and then store the response
+     */
+    func registerClient(metadata: OIDServiceConfiguration, accessToken: String) -> CoFuture<OIDRegistrationResponse> {
+        
+        let promise = CoPromise<OIDRegistrationResponse>()
+        
+        let (redirectUri, parseError) = self.config.getRedirectUri()
+        if redirectUri == nil {
+            promise.fail(parseError!)
+            return promise
+        }
+        
+        var extraParams = [String: String]()
+        extraParams["scope"] = self.config.scope
+        extraParams["requires_consent"] = "false"
+        extraParams["post_logout_redirect_uris"] = self.config.postLogoutRedirectUri
+
+        let nonTemplatizedRequest = OIDRegistrationRequest(
+            configuration: metadata,
+            redirectURIs: [redirectUri!],
+            responseTypes: nil,
+            grantTypes: [OIDGrantTypeAuthorizationCode],
+            subjectType: nil,
+            tokenEndpointAuthMethod: "client_secret_basic",
+            initialAccessToken: accessToken,
+            additionalParameters: extraParams)
+
+        OIDAuthorizationService.perform(nonTemplatizedRequest) { response, ex in
+            
+            if response != nil {
+                
+                let registrationResponse = response!
+                let clientSecret = registrationResponse.clientSecret == nil ? "" : registrationResponse.clientSecret!
+                Logger.info(data: "Registration data retrieved successfully")
+                
+                Logger.debug(data: "ID: \(registrationResponse.clientID), Secret: \(clientSecret)")
+                promise.success(registrationResponse)
+
+            } else {
+                
+                let error = self.createAuthorizationError(title: "Registration Error", ex: ex)
                 promise.fail(error)
             }
         }

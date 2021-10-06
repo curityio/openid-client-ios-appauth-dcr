@@ -26,7 +26,6 @@ struct UnauthenticatedView: View {
     
     var body: some View {
     
-        let authenticationDisabled = !self.model.isRegistered
         return VStack {
             
             if self.model.error != nil {
@@ -47,8 +46,8 @@ struct UnauthenticatedView: View {
             .padding(.top, 20)
             .padding(.leading, 20)
             .padding(.trailing, 20)
-            .buttonStyle(CustomButtonStyle(disabled: authenticationDisabled))
-            .disabled(authenticationDisabled)
+            .buttonStyle(CustomButtonStyle(disabled: false))
+            .disabled(false)
             
             Spacer()
         }
@@ -56,6 +55,5 @@ struct UnauthenticatedView: View {
     }
     
     func onViewCreated() {
-        self.model.registerIfRequired()
     }
 }

@@ -23,8 +23,14 @@ class MainViewModel: ObservableObject {
     @Published var isRegistered = false
     @Published var isAuthenticated = false
     
-    init(appauth: AppAuthHandler) {
+    init(config: ApplicationConfig, appauth: AppAuthHandler) {
         self.appauth = appauth
+        self.isRegistered = true
+    }
+    
+    func load() {
+        ApplicationStateManager.load()
+        self.isRegistered = ApplicationStateManager.registrationResponse != nil
     }
 
     func onRegistered() {

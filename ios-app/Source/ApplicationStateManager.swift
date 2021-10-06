@@ -78,6 +78,7 @@ struct ApplicationStateManager {
         }
         set(value) {
             self.authState = OIDAuthState(registrationResponse: value!)
+            ApplicationStateManager.save()
         }
     }
     

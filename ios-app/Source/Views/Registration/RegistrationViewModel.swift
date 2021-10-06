@@ -20,48 +20,83 @@ import AppAuth
 
 class RegistrationViewModel: ObservableObject {
 
+    private var config: ApplicationConfig
     private var appauth: AppAuthHandler?
     private var onRegistered: (() -> Void)?
 
     @Published var error: ApplicationError?
     
-    init(appauth: AppAuthHandler, onRegistered: @escaping () -> Void) {
+    init(config: ApplicationConfig, appauth: AppAuthHandler, onRegistered: @escaping () -> Void) {
 
+        self.config = config
         self.appauth = appauth
         self.onRegistered = onRegistered
         self.error = nil
     }
 
     /*
-     * Startup handling to lookup metadata
+     * Lookup metadata and perform an initial login using the code flow and the DCR scope
      * Make HTTP requests on a worker thread and then perform updates on the UI thread
      */
     func startRegistration() {
         
         DispatchQueue.main.startCoroutine {
-            
+
             do {
 
+                // First get metadata
                 self.error = nil
-                var metadata = ApplicationStateManager.metadata
-
+                var metadata: OIDServiceConfiguration? = nil
                 try DispatchQueue.global().await {
-                    
-                    if metadata == nil {
-                        metadata = try self.appauth!.fetchMetadata().await()
-                    }
+                    metadata = try self.appauth!.fetchMetadata().await()
                 }
-                
                 ApplicationStateManager.metadata = metadata
-                
+
+                // Perform the code flow redirect for the initial sign in with a DCR scope
+                let authorizationResponse = try self.appauth!.performAuthorizationRedirect(
+                    metadata: metadata!,
+                    clientID: self.config.registrationClientID,
+                    scope: "dcr",
+                    viewController: self.getViewController()
+                ).await()
+
+                if authorizationResponse != nil {
+
+                    // Swap the code for a DCR access token
+                    var dcrAccessToken: String? = ""
+                    var tokenResponse: OIDTokenResponse? = nil
+                    try DispatchQueue.global().await {
+
+                        tokenResponse = try self.appauth!.redeemCodeForTokens(clientSecret: nil, authResponse: authorizationResponse!)
+                            .await()
+                    }
+                    dcrAccessToken = tokenResponse?.accessToken
+                    
+                    // Then send the registration request, which is secured via the access token
+                    var registrationResponse: OIDRegistrationResponse? = nil
+                    try DispatchQueue.global().await {
+
+                        registrationResponse = try self.appauth!.registerClient(metadata: metadata!, accessToken: dcrAccessToken!)
+                            .await()
+                    }
+                    ApplicationStateManager.registrationResponse = registrationResponse
+                    
+                    // Tell the main view to update
+                    self.onRegistered!()
+                }
+
             } catch {
-                
+
                 let appError = error as? ApplicationError
                 if appError != nil {
                     self.error = appError!
                 }
             }
         }
+    }
+    
+    private func getViewController() -> UIViewController {
+        return UIApplication.shared.windows.first!.rootViewController!
     }
 }
 

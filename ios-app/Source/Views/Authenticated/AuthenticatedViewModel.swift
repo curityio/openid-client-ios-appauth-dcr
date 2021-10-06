@@ -53,8 +53,6 @@ class AuthenticatedViewModel: ObservableObject {
      */
     func processTokens() {
 
-        self.subject = "demouser"
-        
         if ApplicationStateManager.tokenResponse?.accessToken != nil {
             self.accessToken = ApplicationStateManager.tokenResponse!.accessToken!
         }

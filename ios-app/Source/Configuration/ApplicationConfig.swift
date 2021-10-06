@@ -21,12 +21,14 @@ import Foundation
 struct ApplicationConfig: Decodable {
 
     let issuer: String
+    let registrationClientID: String
     let redirectUri: String
     let postLogoutRedirectUri: String
     let scope: String
     
     init() {
         self.issuer = ""
+        self.registrationClientID = ""
         self.redirectUri = ""
         self.postLogoutRedirectUri = ""
         self.scope = ""

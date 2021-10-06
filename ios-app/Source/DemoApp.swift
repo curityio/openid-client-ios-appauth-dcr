@@ -26,12 +26,12 @@ struct DemoApp: App {
     init() {
         self.config = ApplicationConfigLoader.load()
         self.appauth = AppAuthHandler(config: config)
-        self.model = MainViewModel(appauth: appauth)
+        self.model = MainViewModel(config: config, appauth: appauth)
     }
     
     var body: some Scene {
         WindowGroup {
-            MainView(model: self.model)
+            MainView(config: self.config, model: self.model)
         }
     }
 }
