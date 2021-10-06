@@ -1,10 +1,11 @@
 # AppAuth with Dynamic Client Registration
 
-An extended AppAuth sample using Dynamic Client Registration, in line with [Mobile Best Practices](https://curity.io/resources/learn/oauth-for-mobile-apps-best-practices/).
+An extended AppAuth sample using authenticated Dynamic Client Registration.\
+This improves the mobile app's security as detailed in [Mobile Best Practices](https://curity.io/resources/learn/oauth-for-mobile-apps-best-practices/).
 
 ## Walkthrough
 
-The [Mobile Authenticated DCR Code Example](https://curity.io/resources/learn/resources/appauth-dcr) article explains the complete configuration and behavior.
+The [Walkthrough Article](https://curity.io/resources/learn/resources/appauth-dcr) explains the complete configuration and behavior.
 
 ## Prerequisites
 
@@ -12,14 +13,15 @@ First copy a `license.json` file for the Curity Identity Server into the `idsvr`
 
 ## Quick Start
 
-Deploy the Curity Identity Server with preconfigured settings:
+Deploy the Curity Identity Server with settings preconfigured for DCR.\
+An ngrok tunnel enables mobile connectivity to the Identity Server's endpoints.
 
 ```bash
 ./deploy.sh
 ```
 
-- Open the `ios-app` folder in XCode 12.5 or later and run the app on a simulator or device.
-- Open the `android-app` folder in Android 4.2 or later and run the app on an emulator or device.
+- In XCode 12.5 or later run by opening the `ios-app` folder.
+- In Android Studio 4.2 or later run the app by opening the `android-app` folder.
 
 ## User Experience
 
@@ -29,12 +31,12 @@ This gets an access token with the DCR scope, after which registration request i
 ![images](/images/registration-view.png)
 
 The user must then authenticate again, and this is automatic via Single Sign On.\
-On all subsequent authentication requests the user only sees this screen:
+On all subsequent authentication requests the user only needs to sign in once:
 
 ![images](/images/unauthenticated-view.png)
 
-Once authenticated the user is moved to the authenticated view.\
-The demo app simply allows other lifecycle events to be tested from here.
+Once authenticated, the user is moved to the authenticated view.\
+The demo app simply allows other OAuth lifecycle events to be tested.
 
 ![images](/images/authenticated-view.png)
 
