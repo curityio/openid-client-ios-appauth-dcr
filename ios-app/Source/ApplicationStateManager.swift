@@ -46,7 +46,7 @@ struct ApplicationStateManager {
         self.idToken = KeychainWrapper.standard.string(forKey: self.storageKey + ".idtoken")
     }
     
-    static func save() {
+    static func saveRegistration() {
         
         if self.authState?.lastRegistrationResponse != nil {
             
@@ -58,6 +58,15 @@ struct ApplicationStateManager {
                 Logger.error(data: "Problem encountered saving application state: \(error)")
             }
         }
+        
+        if idToken != nil {
+            KeychainWrapper.standard.set(idToken!, forKey: self.storageKey + ".idtoken")
+        } else {
+            KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".idtoken")
+        }
+    }
+    
+    static func saveTokens() {
         
         if idToken != nil {
             KeychainWrapper.standard.set(idToken!, forKey: self.storageKey + ".idtoken")
@@ -86,7 +95,7 @@ struct ApplicationStateManager {
         }
         set(value) {
             self.authState = OIDAuthState(registrationResponse: value!)
-            ApplicationStateManager.save()
+            ApplicationStateManager.saveRegistration()
         }
     }
     
@@ -96,6 +105,7 @@ struct ApplicationStateManager {
         }
         set(value) {
             self.authState?.update(with: value, error: nil)
+            ApplicationStateManager.saveTokens()
         }
     }
 }
