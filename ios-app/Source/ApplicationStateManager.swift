@@ -31,9 +31,9 @@ struct ApplicationStateManager {
         
         let data = KeychainWrapper.standard.data(forKey: self.storageKey + ".registration")
         if data != nil {
-        
+
             do {
-            
+
                 let registrationResponse = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data!) as? OIDRegistrationResponse
                 if registrationResponse != nil {
                     self.authState = OIDAuthState(registrationResponse: registrationResponse!)
@@ -42,10 +42,10 @@ struct ApplicationStateManager {
                 Logger.error(data: "Problem encountered loading application state: \(error)")
             }
         }
-        
+
         self.idToken = KeychainWrapper.standard.string(forKey: self.storageKey + ".idtoken")
     }
-    
+
     static func saveRegistration() {
         
         if self.authState?.lastRegistrationResponse != nil {

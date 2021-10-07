@@ -51,8 +51,8 @@ class MainViewModel: ObservableObject {
 
         // Update child view models
         self.registrationModel.load(config: self.config, appauth: self.appauth, onRegistered: self.onRegistered)
-        self.unauthenticatedModel.load(config: self.config, appauth: self.appauth, onLoggedIn: self.onLoggedIn)
-        self.authenticatedModel.load(config: self.config, appauth: self.appauth, onLoggedOut: self.onLoggedOut)
+        self.unauthenticatedModel.load(config: self.config!, appauth: self.appauth!, onLoggedIn: self.onLoggedIn)
+        self.authenticatedModel.load(config: self.config!, appauth: self.appauth!, onLoggedOut: self.onLoggedOut)
     }
 
     func onRegistered() {

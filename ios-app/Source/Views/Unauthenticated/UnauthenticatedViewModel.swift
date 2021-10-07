@@ -23,6 +23,7 @@ class UnauthenticatedViewModel: ObservableObject {
     private var config: ApplicationConfig?
     private var appauth: AppAuthHandler?
     private var onLoggedIn: (() -> Void)?
+
     @Published var isLoaded: Bool
     @Published var error: ApplicationError?
     
@@ -34,7 +35,7 @@ class UnauthenticatedViewModel: ObservableObject {
         self.isLoaded = false
     }
     
-    func load(config: ApplicationConfig?, appauth: AppAuthHandler?, onLoggedIn: @escaping () -> Void) {
+    func load(config: ApplicationConfig, appauth: AppAuthHandler, onLoggedIn: @escaping () -> Void) {
         self.config = config
         self.appauth = appauth
         self.onLoggedIn = onLoggedIn

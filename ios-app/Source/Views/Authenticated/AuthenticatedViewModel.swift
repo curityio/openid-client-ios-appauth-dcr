@@ -24,14 +24,15 @@ class AuthenticatedViewModel: ObservableObject {
     private var config: ApplicationConfig?
     private var appauth: AppAuthHandler?
     private var onLoggedOut: (() -> Void)?
-    @Published var isLoaded: Bool
+
     @Published var hasRefreshToken: Bool
     @Published var hasIdToken: Bool
     @Published var subject: String
     @Published var accessToken: String
     @Published var refreshToken: String
     @Published var error: ApplicationError?
-    
+    @Published var isLoaded: Bool
+
     struct IDTokenClaims: Claims {
         var sub: String
     }
@@ -49,7 +50,7 @@ class AuthenticatedViewModel: ObservableObject {
         self.isLoaded = false
     }
     
-    func load(config: ApplicationConfig?, appauth: AppAuthHandler?, onLoggedOut: @escaping () -> Void) {
+    func load(config: ApplicationConfig, appauth: AppAuthHandler, onLoggedOut: @escaping () -> Void) {
         self.config = config
         self.appauth = appauth
         self.onLoggedOut = onLoggedOut

@@ -53,7 +53,7 @@
 		280AFE12268863900063EAD6 /* AuthenticatedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatedViewModel.swift; sourceTree = "<group>"; };
 		28B483A126FDE46500DD3733 /* config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = config.json; sourceTree = SOURCE_ROOT; };
 		28B483A326FDE6A300DD3733 /* ApplicationConfigLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationConfigLoader.swift; sourceTree = "<group>"; };
-		28B6C4E92685CC3E00241CE3 /* AppAuthDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppAuthDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		28B6C4E92685CC3E00241CE3 /* AppAuthDcrDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppAuthDcrDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		28B6C4EC2685CC3E00241CE3 /* DemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoApp.swift; sourceTree = "<group>"; };
 		28B6C4EE2685CC3E00241CE3 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		28B6C4F02685CC3F00241CE3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -159,7 +159,7 @@
 		28B6C4EA2685CC3E00241CE3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				28B6C4E92685CC3E00241CE3 /* AppAuthDemo.app */,
+				28B6C4E92685CC3E00241CE3 /* AppAuthDcrDemo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -190,9 +190,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		28B6C4E82685CC3E00241CE3 /* AppAuthDemo */ = {
+		28B6C4E82685CC3E00241CE3 /* AppAuthDcrDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 28B6C4F82685CC3F00241CE3 /* Build configuration list for PBXNativeTarget "AppAuthDemo" */;
+			buildConfigurationList = 28B6C4F82685CC3F00241CE3 /* Build configuration list for PBXNativeTarget "AppAuthDcrDemo" */;
 			buildPhases = (
 				28B6C4E52685CC3E00241CE3 /* Sources */,
 				28B6C4E62685CC3E00241CE3 /* Frameworks */,
@@ -202,7 +202,7 @@
 			);
 			dependencies = (
 			);
-			name = AppAuthDemo;
+			name = AppAuthDcrDemo;
 			packageProductDependencies = (
 				280AFDEC2685EB9C0063EAD6 /* AppAuth */,
 				280AFDEF2685EBB90063EAD6 /* SwiftCoroutine */,
@@ -210,7 +210,7 @@
 				28587713268C542B0036D88C /* SwiftKeychainWrapper */,
 			);
 			productName = client;
-			productReference = 28B6C4E92685CC3E00241CE3 /* AppAuthDemo.app */;
+			productReference = 28B6C4E92685CC3E00241CE3 /* AppAuthDcrDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -227,7 +227,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 28B6C4E42685CC3E00241CE3 /* Build configuration list for PBXProject "AppAuthDemo" */;
+			buildConfigurationList = 28B6C4E42685CC3E00241CE3 /* Build configuration list for PBXProject "AppAuthDemoDCR" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -246,7 +246,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				28B6C4E82685CC3E00241CE3 /* AppAuthDemo */,
+				28B6C4E82685CC3E00241CE3 /* AppAuthDcrDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -424,8 +424,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.curity.identityserver.client;
-				PRODUCT_NAME = AppAuthDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = io.curity.identityserver.appauthdcr;
+				PRODUCT_NAME = AppAuthDcrDemo;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -445,8 +445,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.curity.identityserver.client;
-				PRODUCT_NAME = AppAuthDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = io.curity.identityserver.appauthdcr;
+				PRODUCT_NAME = AppAuthDcrDemo;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -455,7 +455,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		28B6C4E42685CC3E00241CE3 /* Build configuration list for PBXProject "AppAuthDemo" */ = {
+		28B6C4E42685CC3E00241CE3 /* Build configuration list for PBXProject "AppAuthDemoDCR" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				28B6C4F62685CC3F00241CE3 /* Debug */,
@@ -464,7 +464,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		28B6C4F82685CC3F00241CE3 /* Build configuration list for PBXNativeTarget "AppAuthDemo" */ = {
+		28B6C4F82685CC3F00241CE3 /* Build configuration list for PBXNativeTarget "AppAuthDcrDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				28B6C4F92685CC3F00241CE3 /* Debug */,

@@ -23,6 +23,7 @@ class RegistrationViewModel: ObservableObject {
     private var config: ApplicationConfig?
     private var appauth: AppAuthHandler?
     private var onRegistered: (() -> Void)?
+
     @Published var isLoaded: Bool
     @Published var error: ApplicationError?
     
