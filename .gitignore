@@ -1,8 +1,30 @@
 .DS_Store
 idsvr/license.json
+
+# iOS
 xcuserdata/
 *.hmap
 *.ipa
 *.dSYM.zip
 *.dSYM
 build/
+
+# Android
+*.apk
+*.aar
+*.ap_
+*.aab
+*.class
+bin/
+gen/
+out/
+.gradle/
+build/
+proguard/
+*.log
+*.iml
+.idea/*
+.gradle
+/local.properties
+/build
+app/build/
