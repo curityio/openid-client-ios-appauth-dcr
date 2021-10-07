@@ -44,7 +44,7 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
 
         return suspendCoroutine { continuation ->
 
-            fetchFromIssuer(config.issuer) { metadata, ex ->
+            fetchFromIssuer(config.getIssuerUri()) { metadata, ex ->
 
                 when {
                     metadata != null -> {
@@ -84,7 +84,7 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
             val nonTemplatizedRequest =
                 RegistrationRequest.Builder(
                     metadata,
-                    listOf(config.redirectUri)
+                    listOf(config.getRedirectUri())
                 )
                     .setGrantTypeValues(listOf(GrantTypeValues.AUTHORIZATION_CODE))
                     .setAdditionalParameters(extraParams)
@@ -120,7 +120,7 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
 
         val request = AuthorizationRequest.Builder(metadata, registrationResponse.clientId,
             ResponseTypeValues.CODE,
-            config.redirectUri)
+            config.getRedirectUri())
             .setScopes(config.scope)
             .setAdditionalParameters(extraParams)
             .build()
@@ -228,7 +228,7 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
         val extraParams = mapOf("client_id" to registrationResponse.clientId)
         val request = EndSessionRequest.Builder(metadata)
             .setIdTokenHint(idToken)
-            .setPostLogoutRedirectUri(config.postLogoutRedirectUri)
+            .setPostLogoutRedirectUri(config.getPostLogoutRedirectUri())
             .setAdditionalParameters(extraParams)
             .build()
 

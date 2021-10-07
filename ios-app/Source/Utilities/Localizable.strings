@@ -1,7 +1,7 @@
 "main_title" = "Curity DCR Demo App";
 "unregistered_message" = "Perform an initial login to register the app";
-"unauthenticated_message" = "Authenticate to start using the app";
 "start_registration" = "Start Registration";
+"unauthenticated_message" = "Authenticate to start using the app";
 "start_authentication" = "Start Authentication";
 "subject" = "Subject";
 "access_token" = "Access Token";

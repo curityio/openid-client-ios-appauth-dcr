@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views.unauthenticated;
+package io.curity.identityserver.client.views.registration;
 
 import android.content.Intent
 import androidx.databinding.BaseObservable
@@ -31,8 +31,8 @@ import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
 import java.lang.ref.WeakReference
 
-class UnauthenticatedFragmentViewModel(
-    private val events: WeakReference<UnauthenticatedFragmentEvents>,
+class RegistrationFragmentViewModel(
+    private val events: WeakReference<RegistrationFragmentEvents>,
     private val appauth: AppAuthHandler,
     val error: ErrorFragmentViewModel) : BaseObservable() {
 
@@ -114,7 +114,7 @@ class UnauthenticatedFragmentViewModel(
                     withContext(Dispatchers.Main) {
                         ApplicationStateManager.tokenResponse = tokenResponse
                         ApplicationStateManager.idToken = tokenResponse?.idToken
-                        events.get()?.onLoggedIn()
+                        events.get()?.onRegistered()
                     }
 
                 } catch (ex: ApplicationException) {
