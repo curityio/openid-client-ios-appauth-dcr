@@ -24,6 +24,7 @@ import java.net.URL
  */
 class ApplicationConfig {
     lateinit var issuer: String
+    lateinit var registrationClientID: String
     lateinit var redirectUri: String
     lateinit var postLogoutRedirectUri: String
     lateinit var scope: String

@@ -70,58 +70,24 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
     }
 
     /*
-     * Perform dynamic client registration and then store the response
-     */
-    suspend fun registerClient(metadata: AuthorizationServiceConfiguration): RegistrationResponse {
-
-        return suspendCoroutine { continuation ->
-
-            val extraParams = mutableMapOf<String, String>()
-            extraParams["scope"] = config.scope
-            extraParams["requires_consent"] = "false"
-            extraParams["post_logout_redirect_uris"] = config.postLogoutRedirectUri.toString()
-
-            val nonTemplatizedRequest =
-                RegistrationRequest.Builder(
-                    metadata,
-                    listOf(config.getRedirectUri())
-                )
-                    .setGrantTypeValues(listOf(GrantTypeValues.AUTHORIZATION_CODE))
-                    .setAdditionalParameters(extraParams)
-                    .build()
-
-            authService.performRegistrationRequest(nonTemplatizedRequest) { registrationResponse, ex ->
-                when {
-                    registrationResponse != null -> {
-                        Log.i(ContentValues.TAG, "Registration data retrieved successfully")
-                        Log.d(ContentValues.TAG, "ID: ${registrationResponse.clientId}, Secret: ${registrationResponse.clientSecret}")
-                        continuation.resume(registrationResponse)
-                    }
-                    else -> {
-                        val error = createAuthorizationError("Registration Error", ex)
-                        continuation.resumeWithException(error)
-                    }
-                }
-            }
-        }
-    }
-
-    /*
      * Trigger a redirect with standard parameters
      * acr_values can be sent as an extra parameter, to control authentication methods
      */
     fun getAuthorizationRedirectIntent(
         metadata: AuthorizationServiceConfiguration,
-        registrationResponse: RegistrationResponse): Intent {
+        clientID: String,
+        scope: String): Intent {
 
         // Use acr_values to select a particular authentication method at runtime
         val extraParams = mutableMapOf<String, String>()
         //extraParams.put("acr_values", "urn:se:curity:authentication:html-form:Username-Password")
 
-        val request = AuthorizationRequest.Builder(metadata, registrationResponse.clientId,
+        val request = AuthorizationRequest.Builder(
+            metadata,
+            clientID,
             ResponseTypeValues.CODE,
             config.getRedirectUri())
-            .setScopes(config.scope)
+            .setScopes(scope)
             .setAdditionalParameters(extraParams)
             .build()
 
@@ -148,12 +114,15 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
      * Handle the authorization code grant request to get tokens
      */
     suspend fun redeemCodeForTokens(
-        registrationResponse: RegistrationResponse,
+        clientSecret: String?,
         authResponse: AuthorizationResponse): TokenResponse? {
 
         return suspendCoroutine { continuation ->
 
-            val extraParams = mapOf("client_secret" to registrationResponse.clientSecret)
+            val extraParams = mutableMapOf<String, String>()
+            if (clientSecret != null) {
+                extraParams["client_secret"] = clientSecret
+            }
             val tokenRequest = authResponse.createTokenExchangeRequest(extraParams)
 
             authService.performTokenRequest(tokenRequest) { tokenResponse, ex ->
@@ -166,6 +135,45 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
                     }
                     else -> {
                         val error = createAuthorizationError("Authorization Response Error", ex)
+                        continuation.resumeWithException(error)
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+     * Perform dynamic client registration and then store the response
+     */
+    suspend fun registerClient(
+        metadata: AuthorizationServiceConfiguration,
+        dcrAccessToken: String): RegistrationResponse {
+
+        return suspendCoroutine { continuation ->
+
+            val extraParams = mutableMapOf<String, String>()
+            extraParams["scope"] = config.scope
+            extraParams["requires_consent"] = "false"
+            extraParams["post_logout_redirect_uris"] = config.postLogoutRedirectUri.toString()
+
+            val nonTemplatizedRequest =
+                RegistrationRequest.Builder(
+                    metadata,
+                    listOf(config.getRedirectUri())
+                )
+                    .setGrantTypeValues(listOf(GrantTypeValues.AUTHORIZATION_CODE))
+                    .setAdditionalParameters(extraParams)
+                    .build()
+
+            authService.performRegistrationRequest(nonTemplatizedRequest) { registrationResponse, ex ->
+                when {
+                    registrationResponse != null -> {
+                        Log.i(ContentValues.TAG, "Registration data retrieved successfully")
+                        Log.d(ContentValues.TAG, "ID: ${registrationResponse.clientId}, Secret: ${registrationResponse.clientSecret}")
+                        continuation.resume(registrationResponse)
+                    }
+                    else -> {
+                        val error = createAuthorizationError("Registration Error", ex)
                         continuation.resumeWithException(error)
                     }
                 }

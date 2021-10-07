@@ -53,6 +53,7 @@ class AuthenticatedFragment : androidx.fragment.app.Fragment(), AuthenticatedFra
         this.binding = FragmentAuthenticatedBinding.inflate(inflater, container, false)
         this.binding.model = AuthenticatedFragmentViewModel(
             WeakReference(this),
+            mainViewModel.config,
             mainViewModel.appauth,
             errorViewModel)
         return this.binding.root

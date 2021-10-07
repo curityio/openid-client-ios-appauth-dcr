@@ -22,6 +22,7 @@ import android.util.Log
 import androidx.databinding.BaseObservable
 import io.curity.identityserver.client.AppAuthHandler
 import io.curity.identityserver.client.ApplicationStateManager
+import io.curity.identityserver.client.configuration.ApplicationConfig
 import io.curity.identityserver.client.errors.ApplicationException
 import io.curity.identityserver.client.errors.InvalidIdTokenException
 import io.curity.identityserver.client.views.error.ErrorFragmentViewModel
@@ -38,13 +39,13 @@ import java.lang.ref.WeakReference
 
 class AuthenticatedFragmentViewModel(
     private val events: WeakReference<AuthenticatedFragmentEvents>,
+    private val config: ApplicationConfig,
     private val appauth: AppAuthHandler,
     val error: ErrorFragmentViewModel) : BaseObservable() {
 
     var subject: String = ""
     var accessToken: String = ""
     var refreshToken: String = ""
-
     var hasRefreshToken = false
     var hasIdToken = false
 

@@ -20,6 +20,7 @@ import android.content.Intent
 import androidx.databinding.BaseObservable
 import io.curity.identityserver.client.AppAuthHandler
 import io.curity.identityserver.client.ApplicationStateManager
+import io.curity.identityserver.client.configuration.ApplicationConfig
 import io.curity.identityserver.client.errors.ApplicationException
 import io.curity.identityserver.client.views.error.ErrorFragmentViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -28,41 +29,42 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
-import net.openid.appauth.TokenResponse
+import net.openid.appauth.AuthorizationServiceConfiguration
+import net.openid.appauth.RegistrationResponse
 import java.lang.ref.WeakReference
 
 class RegistrationFragmentViewModel(
     private val events: WeakReference<RegistrationFragmentEvents>,
+    private val config: ApplicationConfig,
     private val appauth: AppAuthHandler,
     val error: ErrorFragmentViewModel) : BaseObservable() {
 
-    var isRegistered = false
-
     /*
-     * Startup handling to lookup metadata and do the dynamic client registration if required
-     * Make HTTP requests on a worker thread and then perform updates on the UI thread
+     * Start an initial redirect with the dcr scope, to get the DCR access token
      */
-    fun registerIfRequired() {
+    fun startLogin() {
 
-        /*var metadata = ApplicationStateManager.metadata
-        var registrationResponse = ApplicationStateManager.registrationResponse
-
+        val that = this@RegistrationFragmentViewModel
         CoroutineScope(Dispatchers.IO).launch {
-
             try {
 
+                // Look up metadata on a worker thread
+                that.error.clearDetails()
+                var metadata: AuthorizationServiceConfiguration? = null
                 if (metadata == null) {
                     metadata = appauth.fetchMetadata()
                 }
-                if (registrationResponse == null) {
-                    registrationResponse = appauth.registerClient(metadata!!)
-                }
 
+                // Switch back to the UI thread for the redirect
                 withContext(Dispatchers.Main) {
-                    ApplicationStateManager.metadata = metadata
-                    ApplicationStateManager.registrationResponse = registrationResponse
-                    isRegistered = true
-                    notifyChange()
+
+                    val intent = appauth.getAuthorizationRedirectIntent(
+                        metadata,
+                        that.config.registrationClientID,
+                        "dcr"
+                    )
+
+                    that.events.get()?.startLoginRedirect(intent)
                 }
 
             } catch (ex: ApplicationException) {
@@ -71,26 +73,11 @@ class RegistrationFragmentViewModel(
                     error.setDetails(ex)
                 }
             }
-        }*/
+        }
     }
 
     /*
-     * Build the authorization redirect URL and then ask the view to redirect
-     */
-    fun startLogin() {
-
-        this.error.clearDetails()
-        val intent = appauth.getAuthorizationRedirectIntent(
-            ApplicationStateManager.metadata!!,
-            ApplicationStateManager.registrationResponse!!
-        )
-
-        this.events.get()?.startLoginRedirect(intent)
-    }
-
-    /*
-     * Redeem the code for tokens and also handle failures or the user cancelling the Chrome Custom Tab
-     * Make HTTP requests on a worker thread and then perform updates on the UI thread
+     * Redeem the code for the DCR access token and then register the dynamic client
      */
     fun endLogin(data: Intent) {
 
@@ -100,20 +87,27 @@ class RegistrationFragmentViewModel(
                 AuthorizationResponse.fromIntent(data),
                 AuthorizationException.fromIntent(data))
 
-            val registrationResponse = ApplicationStateManager.registrationResponse!!
-            var tokenResponse: TokenResponse?
+            val metadata = ApplicationStateManager.metadata!!
+            var dcrAccessToken: String?
+            var registrationResponse: RegistrationResponse?
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
 
-                    tokenResponse = appauth.redeemCodeForTokens(
-                        registrationResponse,
+                    // Swap the code for the DCR access token
+                    val tokenResponse = appauth.redeemCodeForTokens(
+                        null,
                         authorizationResponse
                     )
+                    dcrAccessToken = tokenResponse?.accessToken
 
+                    // Securely register the client
+                    registrationResponse = appauth.registerClient(metadata, dcrAccessToken!!)
+
+                    // Update application state
                     withContext(Dispatchers.Main) {
-                        ApplicationStateManager.tokenResponse = tokenResponse
-                        ApplicationStateManager.idToken = tokenResponse?.idToken
+                        ApplicationStateManager.metadata = metadata
+                        ApplicationStateManager.registrationResponse = registrationResponse
                         events.get()?.onRegistered()
                     }
 

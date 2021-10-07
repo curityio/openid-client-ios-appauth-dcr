@@ -53,14 +53,10 @@ class RegistrationFragment : androidx.fragment.app.Fragment(), RegistrationFragm
         this.binding = FragmentRegistrationBinding.inflate(inflater, container, false)
         this.binding.model = RegistrationFragmentViewModel(
             WeakReference(this),
+            mainViewModel.config,
             mainViewModel.appauth,
             errorViewModel)
         return this.binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        this.binding.model!!.registerIfRequired()
     }
 
     override fun startLoginRedirect(intent: Intent) {

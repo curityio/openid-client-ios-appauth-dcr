@@ -20,20 +20,21 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import io.curity.identityserver.client.AppAuthHandler
 import io.curity.identityserver.client.ApplicationStateManager
+import io.curity.identityserver.client.configuration.ApplicationConfig
 import io.curity.identityserver.client.configuration.ApplicationConfigLoader
 import java.lang.ref.WeakReference
 
 class MainActivityViewModel() : ViewModel() {
 
     lateinit var context: WeakReference<Context>
+    lateinit var config: ApplicationConfig
     lateinit var appauth: AppAuthHandler
 
     fun initialize(activity: WeakReference<Context>) {
         this.context = activity
-
-        val config = ApplicationConfigLoader().load(this.context.get()!!)
+        this.config = ApplicationConfigLoader().load(this.context.get()!!)
         ApplicationStateManager.load(activity.get()!!)
-        this.appauth = AppAuthHandler(config, this.context.get()!!)
+        this.appauth = AppAuthHandler(this.config, this.context.get()!!)
     }
 
     fun save() {

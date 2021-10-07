@@ -53,14 +53,10 @@ class UnauthenticatedFragment : androidx.fragment.app.Fragment(), Unauthenticate
         this.binding = FragmentUnauthenticatedBinding.inflate(inflater, container, false)
         this.binding.model = UnauthenticatedFragmentViewModel(
             WeakReference(this),
+            mainViewModel.config,
             mainViewModel.appauth,
             errorViewModel)
         return this.binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        this.binding.model!!.registerIfRequired()
     }
 
     override fun startLoginRedirect(intent: Intent) {
