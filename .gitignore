@@ -10,6 +10,7 @@ xcuserdata/
 build/
 
 # Android
+android/.idea/*
 *.apk
 *.aar
 *.ap_
@@ -20,11 +21,8 @@ gen/
 out/
 .gradle/
 build/
+app/build/
 proguard/
 *.log
 *.iml
-.idea/*
 .gradle
-/local.properties
-/build
-app/build/
