@@ -20,7 +20,8 @@ import AppAuth
 import SwiftJWT
 
 class AuthenticatedViewModel: ObservableObject {
-    
+
+    private var config: ApplicationConfig
     private var appauth: AppAuthHandler?
     private var onLoggedOut: (() -> Void)?
 
@@ -35,8 +36,9 @@ class AuthenticatedViewModel: ObservableObject {
         var sub: String
     }
     
-    init(appauth: AppAuthHandler, onLoggedOut: @escaping () -> Void) {
+    init(config: ApplicationConfig, appauth: AppAuthHandler, onLoggedOut: @escaping () -> Void) {
 
+        self.config = config
         self.appauth = appauth
         self.onLoggedOut = onLoggedOut
         
@@ -100,7 +102,8 @@ class AuthenticatedViewModel: ObservableObject {
 
                     tokenResponse = try self.appauth!.refreshAccessToken(
                         metadata: metadata,
-                        registrationResponse: registrationResponse,
+                        clientID: registrationResponse.clientID,
+                        clientSecret: registrationResponse.clientSecret!,
                         refreshToken: refreshToken).await()
                 }
                 

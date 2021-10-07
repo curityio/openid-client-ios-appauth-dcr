@@ -19,18 +19,16 @@ import SwiftUI
 struct MainView: View {
 
     @ObservedObject private var model: MainViewModel
-    private let config: ApplicationConfig
     private let registrationModel: RegistrationViewModel
     private let unauthenticatedModel: UnauthenticatedViewModel
     private let authenticatedModel: AuthenticatedViewModel
 
-    init(config: ApplicationConfig, model: MainViewModel) {
+    init(model: MainViewModel) {
 
-        self.config = config
         self.model = model
-        self.registrationModel = RegistrationViewModel(config: config, appauth: model.appauth, onRegistered: model.onRegistered)
-        self.unauthenticatedModel = UnauthenticatedViewModel(config: config, appauth: model.appauth, onLoggedIn: model.onLoggedIn)
-        self.authenticatedModel = AuthenticatedViewModel(appauth: model.appauth, onLoggedOut: model.onLoggedOut)
+        self.registrationModel = RegistrationViewModel(config: model.config, appauth: model.appauth, onRegistered: model.onRegistered)
+        self.unauthenticatedModel = UnauthenticatedViewModel(config: model.config, appauth: model.appauth, onLoggedIn: model.onLoggedIn)
+        self.authenticatedModel = AuthenticatedViewModel(config: model.config, appauth: model.appauth, onLoggedOut: model.onLoggedOut)
     }
     
     var body: some View {

@@ -31,7 +31,7 @@ struct DemoApp: App {
     
     var body: some Scene {
         WindowGroup {
-            MainView(config: self.config, model: self.model)
+            MainView(model: self.model)
         }
     }
 }

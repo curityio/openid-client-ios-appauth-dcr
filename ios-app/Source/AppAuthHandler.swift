@@ -21,12 +21,10 @@ class AppAuthHandler {
     
     private let config: ApplicationConfig
     private var userAgentSession: OIDExternalUserAgentSession?
-    private var userAgent: OIDExternalUserAgentIOS?
     
     init(config: ApplicationConfig) {
         self.config = config
         self.userAgentSession = nil
-        self.userAgent = nil
     }
     
     /*
@@ -101,8 +99,8 @@ class AppAuthHandler {
             responseType: OIDResponseTypeCode,
             additionalParameters: extraParams)
 
-        let agent = self.getUserAgent(viewController: viewController)
-        self.userAgentSession = OIDAuthorizationService.present(request, externalUserAgent: agent) { response, ex in
+        let userAgent = OIDExternalUserAgentIOS(presenting: viewController)
+        self.userAgentSession = OIDAuthorizationService.present(request, externalUserAgent: userAgent!) { response, ex in
             
             if response != nil {
                 
@@ -227,7 +225,8 @@ class AppAuthHandler {
      */
     func refreshAccessToken(
             metadata: OIDServiceConfiguration,
-            registrationResponse: OIDRegistrationResponse,
+            clientID: String,
+            clientSecret: String,
             refreshToken: String) -> CoFuture<OIDTokenResponse?> {
         
         let promise = CoPromise<OIDTokenResponse?>()
@@ -237,8 +236,8 @@ class AppAuthHandler {
             grantType: OIDGrantTypeRefreshToken,
             authorizationCode: nil,
             redirectURL: nil,
-            clientID: registrationResponse.clientID,
-            clientSecret: registrationResponse.clientSecret,
+            clientID: clientID,
+            clientSecret: clientSecret,
             scope: nil,
             refreshToken: refreshToken,
             codeVerifier: nil,
@@ -295,8 +294,8 @@ class AppAuthHandler {
             postLogoutRedirectURL: postLogoutRedirectUri!,
             additionalParameters: nil)
 
-        let agent = self.getUserAgent(viewController: viewController)
-        self.userAgentSession = OIDAuthorizationService.present(request, externalUserAgent: agent) { response, ex in
+        let userAgent = OIDExternalUserAgentIOS(presenting: viewController)
+        self.userAgentSession = OIDAuthorizationService.present(request, externalUserAgent: userAgent!) { response, ex in
             
             if ex != nil {
 
@@ -312,18 +311,6 @@ class AppAuthHandler {
         }
         
         return promise
-    }
-    
-    /*
-     * Create the user agent when first needed
-     */
-    private func getUserAgent(viewController: UIViewController) -> OIDExternalUserAgentIOS {
-
-        if (self.userAgent == nil) {
-            self.userAgent = OIDExternalUserAgentIOS(presenting: viewController)
-        }
-        
-        return self.userAgent!
     }
 
     /*

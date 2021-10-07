@@ -21,7 +21,7 @@ An ngrok tunnel enables mobile connectivity to the Identity Server's endpoints.
 ./deploy.sh
 ```
 
-- In XCode 12.5 or later run by opening the `ios-app` folder.
+- In XCode 12.5 or later run the app by opening the `ios-app` folder.
 - In Android Studio 4.2 or later run the app by opening the `android-app` folder.
 
 Sign in as the following preconfigured test user account:

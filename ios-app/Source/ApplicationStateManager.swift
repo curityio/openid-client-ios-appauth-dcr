@@ -25,6 +25,9 @@ struct ApplicationStateManager {
     private static var storageKey = "io.curity.dcrclient"
     
     static func load() {
+
+        // During development you can force a new registration by deleting existing settings
+        // ApplicationStateManager.delete()
         
         let data = KeychainWrapper.standard.data(forKey: self.storageKey + ".registration")
         if data != nil {
@@ -63,6 +66,11 @@ struct ApplicationStateManager {
         }
     }
     
+    static func delete() {
+        KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".registration")
+        KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".idtoken")
+    }
+
     static var metadata: OIDServiceConfiguration? {
         get {
             return self.metadataValue

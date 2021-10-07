@@ -19,11 +19,13 @@ import SwiftCoroutine
 
 class MainViewModel: ObservableObject {
 
+    let config: ApplicationConfig
     let appauth: AppAuthHandler
     @Published var isRegistered = false
     @Published var isAuthenticated = false
     
     init(config: ApplicationConfig, appauth: AppAuthHandler) {
+        self.config = config
         self.appauth = appauth
         self.isRegistered = true
     }
