@@ -21,10 +21,10 @@ import SwiftJWT
 
 class AuthenticatedViewModel: ObservableObject {
 
-    private var config: ApplicationConfig
+    private var config: ApplicationConfig?
     private var appauth: AppAuthHandler?
     private var onLoggedOut: (() -> Void)?
-
+    @Published var isLoaded: Bool
     @Published var hasRefreshToken: Bool
     @Published var hasIdToken: Bool
     @Published var subject: String
@@ -36,18 +36,24 @@ class AuthenticatedViewModel: ObservableObject {
         var sub: String
     }
     
-    init(config: ApplicationConfig, appauth: AppAuthHandler, onLoggedOut: @escaping () -> Void) {
-
-        self.config = config
-        self.appauth = appauth
-        self.onLoggedOut = onLoggedOut
-        
+    init() {
+        self.config = nil
+        self.appauth = nil
+        self.onLoggedOut = nil
         self.hasRefreshToken = false
         self.hasIdToken = false
         self.subject = ""
         self.accessToken = ""
         self.refreshToken = ""
         self.error = nil
+        self.isLoaded = false
+    }
+    
+    func load(config: ApplicationConfig?, appauth: AppAuthHandler?, onLoggedOut: @escaping () -> Void) {
+        self.config = config
+        self.appauth = appauth
+        self.onLoggedOut = onLoggedOut
+        self.isLoaded = true
     }
     
     /*

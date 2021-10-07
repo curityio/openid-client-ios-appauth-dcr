@@ -19,20 +19,40 @@ import SwiftCoroutine
 
 class MainViewModel: ObservableObject {
 
-    let config: ApplicationConfig
-    let appauth: AppAuthHandler
+    var config: ApplicationConfig?
+    var appauth: AppAuthHandler?
     @Published var isRegistered = false
     @Published var isAuthenticated = false
-    
-    init(config: ApplicationConfig, appauth: AppAuthHandler) {
-        self.config = config
-        self.appauth = appauth
+
+    let registrationModel: RegistrationViewModel
+    let unauthenticatedModel: UnauthenticatedViewModel
+    let authenticatedModel: AuthenticatedViewModel
+
+    init() {
+
+        self.config = nil
+        self.appauth = nil
         self.isRegistered = true
+
+        self.registrationModel = RegistrationViewModel()
+        self.unauthenticatedModel = UnauthenticatedViewModel()
+        self.authenticatedModel = AuthenticatedViewModel()
     }
     
-    func load() {
+    func load() throws {
+
+        // Load configuration
+        self.config = try ApplicationConfigLoader.load()
+        self.appauth = AppAuthHandler(config: self.config!)
+
+        // Load state from the keychain
         ApplicationStateManager.load()
         self.isRegistered = ApplicationStateManager.registrationResponse != nil
+
+        // Update child view models
+        self.registrationModel.load(config: self.config, appauth: self.appauth, onRegistered: self.onRegistered)
+        self.unauthenticatedModel.load(config: self.config, appauth: self.appauth, onLoggedIn: self.onLoggedIn)
+        self.authenticatedModel.load(config: self.config, appauth: self.appauth, onLoggedOut: self.onLoggedOut)
     }
 
     func onRegistered() {

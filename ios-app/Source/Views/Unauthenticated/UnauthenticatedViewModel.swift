@@ -20,18 +20,25 @@ import AppAuth
 
 class UnauthenticatedViewModel: ObservableObject {
 
-    private var config: ApplicationConfig
+    private var config: ApplicationConfig?
     private var appauth: AppAuthHandler?
     private var onLoggedIn: (() -> Void)?
-
+    @Published var isLoaded: Bool
     @Published var error: ApplicationError?
     
-    init(config: ApplicationConfig, appauth: AppAuthHandler, onLoggedIn: @escaping () -> Void) {
-
+    init() {
+        self.config = nil
+        self.appauth = nil
+        self.onLoggedIn = nil
+        self.error = nil
+        self.isLoaded = false
+    }
+    
+    func load(config: ApplicationConfig?, appauth: AppAuthHandler?, onLoggedIn: @escaping () -> Void) {
         self.config = config
         self.appauth = appauth
         self.onLoggedIn = onLoggedIn
-        self.error = nil
+        self.isLoaded = true
     }
     
     /*
@@ -59,7 +66,7 @@ class UnauthenticatedViewModel: ObservableObject {
                 let authorizationResponse = try self.appauth!.performAuthorizationRedirect(
                     metadata: metadata!,
                     clientID: registrationResponse.clientID,
-                    scope: self.config.scope,
+                    scope: self.config!.scope,
                     viewController: self.getViewController()
                 ).await()
 

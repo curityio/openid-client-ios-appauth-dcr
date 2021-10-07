@@ -20,18 +20,26 @@ import AppAuth
 
 class RegistrationViewModel: ObservableObject {
 
-    private var config: ApplicationConfig
+    private var config: ApplicationConfig?
     private var appauth: AppAuthHandler?
     private var onRegistered: (() -> Void)?
-
+    @Published var isLoaded: Bool
     @Published var error: ApplicationError?
     
-    init(config: ApplicationConfig, appauth: AppAuthHandler, onRegistered: @escaping () -> Void) {
+    init() {
 
+        self.config = nil
+        self.appauth = nil
+        self.onRegistered = nil
+        self.error = nil
+        self.isLoaded = false
+    }
+
+    func load(config: ApplicationConfig?, appauth: AppAuthHandler?, onRegistered: @escaping () -> Void) {
         self.config = config
         self.appauth = appauth
         self.onRegistered = onRegistered
-        self.error = nil
+        self.isLoaded = true
     }
 
     /*
@@ -55,7 +63,7 @@ class RegistrationViewModel: ObservableObject {
                 // Perform the code flow redirect for the initial sign in with a DCR scope
                 let authorizationResponse = try self.appauth!.performAuthorizationRedirect(
                     metadata: metadata!,
-                    clientID: self.config.registrationClientID,
+                    clientID: self.config!.registrationClientID,
                     scope: "dcr",
                     viewController: self.getViewController()
                 ).await()

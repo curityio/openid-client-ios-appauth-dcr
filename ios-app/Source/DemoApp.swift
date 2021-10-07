@@ -18,17 +18,13 @@ import SwiftUI
 
 @main
 struct DemoApp: App {
-    
-    private let config: ApplicationConfig
-    private let appauth: AppAuthHandler
+
     private let model: MainViewModel
-    
+
     init() {
-        self.config = ApplicationConfigLoader.load()
-        self.appauth = AppAuthHandler(config: config)
-        self.model = MainViewModel(config: config, appauth: appauth)
+        self.model = MainViewModel()
     }
-    
+
     var body: some Scene {
         WindowGroup {
             MainView(model: self.model)

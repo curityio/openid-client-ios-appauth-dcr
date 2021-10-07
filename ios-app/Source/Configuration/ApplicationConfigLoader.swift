@@ -20,25 +20,15 @@ import Foundation
 
 struct ApplicationConfigLoader {
 
-    static func load() -> ApplicationConfig {
+    static func load() throws -> ApplicationConfig {
 
-        do {
-            
-            let configFilePath = Bundle.main.path(forResource: "config", ofType: "json")
-            let jsonText = try String(contentsOfFile: configFilePath!)
-            let jsonData = jsonText.data(using: .utf8)!
-            let decoder = JSONDecoder()
+        let configFilePath = Bundle.main.path(forResource: "config", ofType: "json")
+        let jsonText = try String(contentsOfFile: configFilePath!)
+        let jsonData = jsonText.data(using: .utf8)!
+        let decoder = JSONDecoder()
 
-            let data =  try decoder.decode(ApplicationConfig.self, from: jsonData)
-            Logger.info(data: data.issuer)
-            return data
-
-        } catch {
-            
-            // TODO: deal with startup errors more correctly
-            Logger.info(data: "Load configuration error: \(error)")
-            let config = ApplicationConfig()
-            return config
-        }
+        let data =  try decoder.decode(ApplicationConfig.self, from: jsonData)
+        Logger.info(data: data.issuer)
+        return data
     }
 }

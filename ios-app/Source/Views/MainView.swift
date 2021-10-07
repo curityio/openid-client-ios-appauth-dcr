@@ -19,16 +19,9 @@ import SwiftUI
 struct MainView: View {
 
     @ObservedObject private var model: MainViewModel
-    private let registrationModel: RegistrationViewModel
-    private let unauthenticatedModel: UnauthenticatedViewModel
-    private let authenticatedModel: AuthenticatedViewModel
 
     init(model: MainViewModel) {
-
         self.model = model
-        self.registrationModel = RegistrationViewModel(config: model.config, appauth: model.appauth, onRegistered: model.onRegistered)
-        self.unauthenticatedModel = UnauthenticatedViewModel(config: model.config, appauth: model.appauth, onLoggedIn: model.onLoggedIn)
-        self.authenticatedModel = AuthenticatedViewModel(config: model.config, appauth: model.appauth, onLoggedOut: model.onLoggedOut)
     }
     
     var body: some View {
@@ -41,14 +34,24 @@ struct MainView: View {
                 .padding(.leading, 20)
             
             if (!self.model.isRegistered) {
-                RegistrationView(model: self.registrationModel)
+                RegistrationView(model: self.model.registrationModel)
             }
             else if (!self.model.isAuthenticated) {
-                UnauthenticatedView(model: self.unauthenticatedModel)
+                UnauthenticatedView(model: self.model.unauthenticatedModel)
             } else {
-                AuthenticatedView(model: self.authenticatedModel)
+                AuthenticatedView(model: self.model.authenticatedModel)
             }
         }
-        .onAppear(perform: self.model.load)
+        .onAppear(perform: self.onViewCreated)
+    }
+    
+    func onViewCreated() {
+        
+        do {
+            try self.model.load()
+
+        } catch {
+            print("** Application load error: \(error)")
+        }
     }
 }

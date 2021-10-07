@@ -26,6 +26,7 @@ struct UnauthenticatedView: View {
     
     var body: some View {
     
+        let isEnabled = self.model.isLoaded
         return VStack {
             
             if self.model.error != nil {
@@ -46,8 +47,8 @@ struct UnauthenticatedView: View {
             .padding(.top, 20)
             .padding(.leading, 20)
             .padding(.trailing, 20)
-            .buttonStyle(CustomButtonStyle(disabled: false))
-            .disabled(false)
+            .buttonStyle(CustomButtonStyle(disabled: !isEnabled))
+            .disabled(!isEnabled)
             
             Spacer()
         }
