@@ -10,7 +10,7 @@ xcuserdata/
 build/
 
 # Android
-android/.idea/*
+android-app/.idea/*
 *.apk
 *.aar
 *.ap_
