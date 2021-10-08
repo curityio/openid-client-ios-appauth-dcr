@@ -143,7 +143,6 @@ class AuthenticatedViewModel: ObservableObject {
 
                 try self.appauth!.performEndSessionRedirect(
                     metadata: ApplicationStateManager.metadata!,
-                    clientID: ApplicationStateManager.registrationResponse!.clientID,
                     idToken: ApplicationStateManager.idToken!,
                     viewController: self.getViewController()
                 ).await()

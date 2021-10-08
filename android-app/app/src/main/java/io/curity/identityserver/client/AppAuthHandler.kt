@@ -285,7 +285,6 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
 
         val fullDescription = parts.joinToString(" : ")
         Log.e(ContentValues.TAG, fullDescription)
-        println("GJA THROWING")
         return ServerCommunicationException(title, fullDescription)
     }
 }

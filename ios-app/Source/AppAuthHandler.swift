@@ -277,14 +277,11 @@ class AppAuthHandler {
      * Do an OpenID Connect end session redirect and remove the SSO cookie
      */
     func performEndSessionRedirect(metadata: OIDServiceConfiguration,
-                                   clientID: String,
                                    idToken: String,
                                    viewController: UIViewController) -> CoFuture<Void> {
         
         let promise = CoPromise<Void>()
-
-        var extraParams = [String: String]()
-        extraParams["client_id"] = clientID
+        let extraParams = [String: String]()
 
         let (postLogoutRedirectUri, parseError) = self.config.getPostLogoutRedirectUri()
         if postLogoutRedirectUri == nil {
