@@ -297,9 +297,10 @@ class AppAuthHandler {
             postLogoutRedirectURL: postLogoutRedirectUri!,
             additionalParameters: extraParams)
 
+        // self.userAgent = OIDExternalUserAgentIOS(presenting: viewController)
         let userAgent = OIDExternalUserAgentIOS(presenting: viewController)
         self.userAgentSession = OIDAuthorizationService.present(request, externalUserAgent: userAgent!) { response, ex in
-            
+    
             if ex != nil {
                 
                 if self.isUserCancellationErrorCode(ex: ex!) {
