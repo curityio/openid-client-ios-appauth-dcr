@@ -16,13 +16,7 @@
 
 package io.curity.identityserver.client.views.unauthenticated;
 
-import android.content.Intent
-import androidx.databinding.BaseObservable
-import io.curity.identityserver.client.AppAuthHandler
-import io.curity.identityserver.client.ApplicationStateManager
-import io.curity.identityserver.client.configuration.ApplicationConfig
-import io.curity.identityserver.client.errors.ApplicationException
-import io.curity.identityserver.client.views.error.ErrorFragmentViewModel
+import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,7 +24,13 @@ import kotlinx.coroutines.withContext
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
-import java.lang.ref.WeakReference
+import android.content.Intent
+import androidx.databinding.BaseObservable
+import io.curity.identityserver.client.AppAuthHandler
+import io.curity.identityserver.client.ApplicationStateManager
+import io.curity.identityserver.client.configuration.ApplicationConfig
+import io.curity.identityserver.client.errors.ApplicationException
+import io.curity.identityserver.client.views.error.ErrorFragmentViewModel
 
 class UnauthenticatedFragmentViewModel(
     private val events: WeakReference<UnauthenticatedFragmentEvents>,
@@ -44,13 +44,38 @@ class UnauthenticatedFragmentViewModel(
     fun startLogin() {
 
         this.error.clearDetails()
-        val intent = appauth.getAuthorizationRedirectIntent(
-            ApplicationStateManager.metadata!!,
-            ApplicationStateManager.registrationResponse!!.clientId,
-            config.scope
-        )
+        var metadata = ApplicationStateManager.metadata
+        val registrationResponse = ApplicationStateManager.registrationResponse
 
-        this.events.get()?.startLoginRedirect(intent)
+        val that = this@UnauthenticatedFragmentViewModel
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+
+                // Look up metadata on a worker thread
+                if (metadata == null) {
+                    metadata = appauth.fetchMetadata()
+                }
+
+                // Switch back to the UI thread for the redirect
+                withContext(Dispatchers.Main) {
+
+                    ApplicationStateManager.metadata = metadata
+                    val intent = appauth.getAuthorizationRedirectIntent(
+                        metadata!!,
+                        registrationResponse!!.clientId,
+                        config.scope
+                    )
+
+                    that.events.get()?.startLoginRedirect(intent)
+                }
+
+            } catch (ex: ApplicationException) {
+
+                withContext(Dispatchers.Main) {
+                    error.setDetails(ex)
+                }
+            }
+        }
     }
 
     /*
@@ -61,21 +86,23 @@ class UnauthenticatedFragmentViewModel(
 
         try {
 
+            val registrationResponse = ApplicationStateManager.registrationResponse
+            var tokenResponse: TokenResponse?
+
             val authorizationResponse = appauth.handleAuthorizationResponse(
                 AuthorizationResponse.fromIntent(data),
                 AuthorizationException.fromIntent(data))
 
-            val registrationResponse = ApplicationStateManager.registrationResponse!!
-            var tokenResponse: TokenResponse?
-
             CoroutineScope(Dispatchers.IO).launch {
                 try {
 
+                    // Swap the code for tokens
                     tokenResponse = appauth.redeemCodeForTokens(
-                        registrationResponse.clientSecret,
+                        registrationResponse!!.clientSecret,
                         authorizationResponse
                     )
 
+                    // Update application state
                     withContext(Dispatchers.Main) {
                         ApplicationStateManager.tokenResponse = tokenResponse
                         ApplicationStateManager.idToken = tokenResponse?.idToken

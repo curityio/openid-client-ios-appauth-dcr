@@ -34,66 +34,89 @@ object ApplicationStateManager {
 
     fun load(context: Context) {
 
+        // Delete settings during development if required
+        // delete(context)
+
         val prefs = context.getSharedPreferences("authState", MODE_PRIVATE)
-        val json = prefs.getString("json", null)
+        val registration = prefs.getString("registration", null)
         val idToken = prefs.getString("idToken", null)
-        if (json != null) {
-            this.authState = AuthState.jsonDeserialize(json)
+
+        if (registration != null) {
+            val lastRegistrationResponse = RegistrationResponse.jsonDeserialize(registration)
+            this.authState = AuthState(lastRegistrationResponse)
+        }
+
+        if (idToken != null) {
             this.idToken = idToken
         }
     }
 
     fun save(context: Context) {
 
-        if (authState?.lastRegistrationResponse != null) {
-
-            val authStateToSave = AuthState()
-            authStateToSave.update(this.authState!!.lastRegistrationResponse)
+        if (this.authState?.lastRegistrationResponse != null) {
 
             val prefs = context.getSharedPreferences("authState", MODE_PRIVATE)
             prefs.edit()
-                .putString("json", authStateToSave.jsonSerializeString())
+                .putString("registration", this.authState!!.lastRegistrationResponse!!.jsonSerializeString())
+                .apply()
+        }
+
+        if (this.idToken != null) {
+
+            val prefs = context.getSharedPreferences("authState", MODE_PRIVATE)
+            prefs.edit()
                 .putString("idToken", this.idToken)
                 .apply()
         }
     }
 
+    fun delete(context: Context) {
+
+        val prefs = context.getSharedPreferences("authState", MODE_PRIVATE)
+        prefs.edit()
+            .remove("registration")
+            .remove("idToken")
+            .apply()
+    }
+
     var metadata: AuthorizationServiceConfiguration?
         get () {
-            return authState?.authorizationServiceConfiguration
+            return this.authState?.authorizationServiceConfiguration
         }
         set (configuration) {
-            authState = AuthState(configuration!!)
+
+            val lastRegistrationResponse = this.authState?.lastRegistrationResponse
+            this.authState = AuthState(configuration!!)
+            if (lastRegistrationResponse != null) {
+                this.authState!!.update(lastRegistrationResponse)
+            }
         }
 
     var registrationResponse: RegistrationResponse?
         get () {
-            return authState?.lastRegistrationResponse
+            return this.authState?.lastRegistrationResponse
         }
         set (registrationResponse) {
-            authState?.update(registrationResponse)
+            this.authState?.update(registrationResponse)
         }
 
     var tokenResponse: TokenResponse?
         get () {
-            return authState?.lastTokenResponse
+            return this.authState?.lastTokenResponse
         }
-        set (tokenResponse) {
+        set(tokenResponse) {
 
-            val oldAuthState = authState
-            authState = AuthState(metadata!!)
-            if (oldAuthState != null) {
-                authState!!.update(oldAuthState.lastRegistrationResponse)
-            }
-
+            this.authState!!.update(tokenResponse, null)
             if (tokenResponse?.idToken != null) {
-                idToken = tokenResponse.idToken
-            }
-
-            if (tokenResponse == null) {
-                idToken = null
-            } else {
-                authState!!.update(tokenResponse, null)
+                this.idToken = tokenResponse.idToken
             }
         }
+
+    fun clearTokens() {
+        val metadata = this.authState?.authorizationServiceConfiguration
+        val lastRegistrationResponse = this.authState?.lastRegistrationResponse
+        this.authState = AuthState(metadata!!)
+        this.authState!!.update(lastRegistrationResponse)
+        this.idToken = null
+    }
 }

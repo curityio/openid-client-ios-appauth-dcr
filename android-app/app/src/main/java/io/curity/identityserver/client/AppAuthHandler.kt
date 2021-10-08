@@ -26,6 +26,7 @@ import io.curity.identityserver.client.errors.GENERIC_ERROR
 import io.curity.identityserver.client.errors.ServerCommunicationException
 import net.openid.appauth.*
 import net.openid.appauth.AuthorizationServiceConfiguration.fetchFromIssuer
+import io.curity.identityserver.client.utilities.HttpHelper
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -149,35 +150,40 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
         metadata: AuthorizationServiceConfiguration,
         dcrAccessToken: String): RegistrationResponse {
 
-        return suspendCoroutine { continuation ->
+        val extraParams = mutableMapOf<String, String>()
+        extraParams["scope"] = config.scope
+        extraParams["requires_consent"] = "false"
+        extraParams["post_logout_redirect_uris"] = config.postLogoutRedirectUri.toString()
 
-            val extraParams = mutableMapOf<String, String>()
-            extraParams["scope"] = config.scope
-            extraParams["requires_consent"] = "false"
-            extraParams["post_logout_redirect_uris"] = config.postLogoutRedirectUri.toString()
+        val nonTemplatizedRequest =
+            RegistrationRequest.Builder(
+                metadata,
+                listOf(config.getRedirectUri())
+            )
+                .setGrantTypeValues(listOf(GrantTypeValues.AUTHORIZATION_CODE))
+                .setAdditionalParameters(extraParams)
+                .build()
 
-            val nonTemplatizedRequest =
-                RegistrationRequest.Builder(
-                    metadata,
-                    listOf(config.getRedirectUri())
-                )
-                    .setGrantTypeValues(listOf(GrantTypeValues.AUTHORIZATION_CODE))
-                    .setAdditionalParameters(extraParams)
-                    .build()
+        try {
 
-            authService.performRegistrationRequest(nonTemplatizedRequest) { registrationResponse, ex ->
-                when {
-                    registrationResponse != null -> {
-                        Log.i(ContentValues.TAG, "Registration data retrieved successfully")
-                        Log.d(ContentValues.TAG, "ID: ${registrationResponse.clientId}, Secret: ${registrationResponse.clientSecret}")
-                        continuation.resume(registrationResponse)
-                    }
-                    else -> {
-                        val error = createAuthorizationError("Registration Error", ex)
-                        continuation.resumeWithException(error)
-                    }
-                }
-            }
+            // We send this request ourselves in order to include the DCR access token
+            val responseData = HttpHelper().postWithAccessToken(
+                nonTemplatizedRequest.configuration.registrationEndpoint.toString(),
+                nonTemplatizedRequest.toJsonString(),
+                dcrAccessToken)
+
+            val registrationResponse = RegistrationResponse.Builder(nonTemplatizedRequest)
+                .fromResponseJsonString(responseData).build();
+
+            Log.i(ContentValues.TAG, "Registration data retrieved successfully")
+            Log.d(ContentValues.TAG, "ID: ${registrationResponse.clientId}, Secret: ${registrationResponse.clientSecret}")
+            return registrationResponse
+
+        } catch (ex: Exception) {
+
+            throw createAuthorizationError(
+                "Registration Error",
+                AuthorizationException.fromTemplate(AuthorizationException.GeneralErrors.NETWORK_ERROR, ex))
         }
     }
 
@@ -279,6 +285,7 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
 
         val fullDescription = parts.joinToString(" : ")
         Log.e(ContentValues.TAG, fullDescription)
+        println("GJA THROWING")
         return ServerCommunicationException(title, fullDescription)
     }
 }

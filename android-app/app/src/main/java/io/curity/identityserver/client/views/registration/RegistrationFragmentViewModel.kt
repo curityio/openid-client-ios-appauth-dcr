@@ -16,6 +16,14 @@
 
 package io.curity.identityserver.client.views.registration;
 
+import java.lang.ref.WeakReference
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import net.openid.appauth.AuthorizationException
+import net.openid.appauth.AuthorizationResponse
+import net.openid.appauth.RegistrationResponse
 import android.content.Intent
 import androidx.databinding.BaseObservable
 import io.curity.identityserver.client.AppAuthHandler
@@ -23,15 +31,6 @@ import io.curity.identityserver.client.ApplicationStateManager
 import io.curity.identityserver.client.configuration.ApplicationConfig
 import io.curity.identityserver.client.errors.ApplicationException
 import io.curity.identityserver.client.views.error.ErrorFragmentViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import net.openid.appauth.AuthorizationException
-import net.openid.appauth.AuthorizationResponse
-import net.openid.appauth.AuthorizationServiceConfiguration
-import net.openid.appauth.RegistrationResponse
-import java.lang.ref.WeakReference
 
 class RegistrationFragmentViewModel(
     private val events: WeakReference<RegistrationFragmentEvents>,
@@ -44,13 +43,14 @@ class RegistrationFragmentViewModel(
      */
     fun startLogin() {
 
+        this.error.clearDetails()
+        var metadata = ApplicationStateManager.metadata
+
         val that = this@RegistrationFragmentViewModel
         CoroutineScope(Dispatchers.IO).launch {
             try {
 
-                // Look up metadata on a worker thread
-                that.error.clearDetails()
-                var metadata: AuthorizationServiceConfiguration? = null
+                // Look up metadata if required
                 if (metadata == null) {
                     metadata = appauth.fetchMetadata()
                 }
@@ -58,8 +58,9 @@ class RegistrationFragmentViewModel(
                 // Switch back to the UI thread for the redirect
                 withContext(Dispatchers.Main) {
 
+                    ApplicationStateManager.metadata = metadata
                     val intent = appauth.getAuthorizationRedirectIntent(
-                        metadata,
+                        metadata!!,
                         that.config.registrationClientID,
                         "dcr"
                     )

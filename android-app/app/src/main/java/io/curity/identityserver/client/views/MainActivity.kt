@@ -21,6 +21,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.NavHostFragment
+import io.curity.identityserver.client.ApplicationStateManager
 import io.curity.identityserver.client.R
 import io.curity.identityserver.client.databinding.ActivityMainBinding
 import java.lang.ref.WeakReference
@@ -38,6 +39,8 @@ class MainActivity : AppCompatActivity() {
 
         this.binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         this.binding.model = model
+
+        this.moveToInitialView();
     }
 
     fun onRegisteredNavigate() {
@@ -58,5 +61,15 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         this.binding.model!!.save()
+    }
+
+    private fun moveToInitialView() {
+
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        if (ApplicationStateManager.registrationResponse == null) {
+            navHostFragment.navController.navigate(R.id.fragment_registration)
+        } else {
+            navHostFragment.navController.navigate(R.id.fragment_unauthenticated)
+        }
     }
 }
