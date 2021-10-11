@@ -54,6 +54,7 @@ class RegistrationFragment : androidx.fragment.app.Fragment(), RegistrationFragm
         this.binding.model = RegistrationFragmentViewModel(
             WeakReference(this),
             mainViewModel.config,
+            mainViewModel.state,
             mainViewModel.appauth,
             errorViewModel)
         return this.binding.root

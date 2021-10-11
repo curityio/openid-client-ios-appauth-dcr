@@ -58,18 +58,18 @@ class MainActivity : AppCompatActivity() {
         navHostFragment.navController.navigate(R.id.fragment_unauthenticated)
     }
 
-    override fun onPause() {
-        super.onPause()
-        this.binding.model!!.save()
-    }
-
     private fun moveToInitialView() {
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        if (ApplicationStateManager.registrationResponse == null) {
+        if (this.binding.model!!.isRegistered()) {
             navHostFragment.navController.navigate(R.id.fragment_registration)
         } else {
             navHostFragment.navController.navigate(R.id.fragment_unauthenticated)
         }
+    }
+
+    override fun onDestroy() {
+        this.binding.model!!.dispose()
+        super.onDestroy()
     }
 }

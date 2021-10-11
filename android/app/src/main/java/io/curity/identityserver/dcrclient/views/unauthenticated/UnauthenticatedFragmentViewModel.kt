@@ -35,6 +35,7 @@ import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 class UnauthenticatedFragmentViewModel(
     private val events: WeakReference<UnauthenticatedFragmentEvents>,
     private val config: ApplicationConfig,
+    private val state: ApplicationStateManager,
     private val appauth: AppAuthHandler,
     val error: ErrorFragmentViewModel) : BaseObservable() {
 
@@ -44,8 +45,8 @@ class UnauthenticatedFragmentViewModel(
     fun startLogin() {
 
         this.error.clearDetails()
-        var metadata = ApplicationStateManager.metadata
-        val registrationResponse = ApplicationStateManager.registrationResponse
+        var metadata = this.state.metadata
+        val registrationResponse = this.state.registrationResponse
 
         val that = this@UnauthenticatedFragmentViewModel
         CoroutineScope(Dispatchers.IO).launch {
@@ -59,7 +60,7 @@ class UnauthenticatedFragmentViewModel(
                 // Switch back to the UI thread for the redirect
                 withContext(Dispatchers.Main) {
 
-                    ApplicationStateManager.metadata = metadata
+                    that.state.metadata = metadata
                     val intent = appauth.getAuthorizationRedirectIntent(
                         metadata!!,
                         registrationResponse!!.clientId,
@@ -86,13 +87,14 @@ class UnauthenticatedFragmentViewModel(
 
         try {
 
-            val registrationResponse = ApplicationStateManager.registrationResponse
+            val registrationResponse = this.state.registrationResponse
             var tokenResponse: TokenResponse?
 
             val authorizationResponse = appauth.handleAuthorizationResponse(
                 AuthorizationResponse.fromIntent(data),
                 AuthorizationException.fromIntent(data))
 
+            val that = this@UnauthenticatedFragmentViewModel
             CoroutineScope(Dispatchers.IO).launch {
                 try {
 
@@ -104,8 +106,7 @@ class UnauthenticatedFragmentViewModel(
 
                     // Update application state
                     withContext(Dispatchers.Main) {
-                        ApplicationStateManager.tokenResponse = tokenResponse
-                        ApplicationStateManager.idToken = tokenResponse?.idToken
+                        that.state.saveTokens(tokenResponse!!)
                         events.get()?.onLoggedIn()
                     }
 

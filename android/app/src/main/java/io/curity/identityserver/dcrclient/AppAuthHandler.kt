@@ -263,6 +263,13 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
     }
 
     /*
+     * Clean up AppAuth resources on exit
+     */
+    fun dispose() {
+        this.authService.dispose()
+    }
+
+    /*
      * Process standard OAuth error / error_description fields and also AppAuth error identifiers
      */
     private fun createAuthorizationError(title: String, ex: AuthorizationException?): ServerCommunicationException {

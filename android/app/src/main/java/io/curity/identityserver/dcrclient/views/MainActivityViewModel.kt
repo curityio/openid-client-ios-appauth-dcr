@@ -28,18 +28,21 @@ class MainActivityViewModel() : ViewModel() {
 
     lateinit var context: WeakReference<Context>
     lateinit var config: ApplicationConfig
+    lateinit var state: ApplicationStateManager
     lateinit var appauth: AppAuthHandler
 
     fun initialize(activity: WeakReference<Context>) {
         this.context = activity
         this.config = ApplicationConfigLoader().load(this.context.get()!!)
-        ApplicationStateManager.load(activity.get()!!)
+        this.state = ApplicationStateManager(context)
         this.appauth = AppAuthHandler(this.config, this.context.get()!!)
     }
 
-    fun save() {
-        if (this.context.get() != null) {
-            ApplicationStateManager.save(this.context.get()!!)
-        }
+    fun isRegistered(): Boolean {
+        return this.state.registrationResponse != null;
+    }
+
+    fun dispose() {
+        this.appauth.dispose()
     }
 }

@@ -35,6 +35,7 @@ import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 class RegistrationFragmentViewModel(
     private val events: WeakReference<RegistrationFragmentEvents>,
     private val config: ApplicationConfig,
+    private val state: ApplicationStateManager,
     private val appauth: AppAuthHandler,
     val error: ErrorFragmentViewModel) : BaseObservable() {
 
@@ -44,7 +45,7 @@ class RegistrationFragmentViewModel(
     fun startLogin() {
 
         this.error.clearDetails()
-        var metadata = ApplicationStateManager.metadata
+        var metadata = this.state.metadata
 
         val that = this@RegistrationFragmentViewModel
         CoroutineScope(Dispatchers.IO).launch {
@@ -58,7 +59,7 @@ class RegistrationFragmentViewModel(
                 // Switch back to the UI thread for the redirect
                 withContext(Dispatchers.Main) {
 
-                    ApplicationStateManager.metadata = metadata
+                    that.state.metadata = metadata
                     val intent = appauth.getAuthorizationRedirectIntent(
                         metadata!!,
                         that.config.registrationClientID,
@@ -88,10 +89,11 @@ class RegistrationFragmentViewModel(
                 AuthorizationResponse.fromIntent(data),
                 AuthorizationException.fromIntent(data))
 
-            val metadata = ApplicationStateManager.metadata!!
+            val metadata = this.state.metadata!!
             var dcrAccessToken: String?
             var registrationResponse: RegistrationResponse?
 
+            val that = this@RegistrationFragmentViewModel
             CoroutineScope(Dispatchers.IO).launch {
                 try {
 
@@ -107,8 +109,8 @@ class RegistrationFragmentViewModel(
 
                     // Update application state
                     withContext(Dispatchers.Main) {
-                        ApplicationStateManager.metadata = metadata
-                        ApplicationStateManager.registrationResponse = registrationResponse
+                        that.state.metadata = metadata
+                        that.state.saveRegistration(registrationResponse!!)
                         events.get()?.onRegistered()
                     }
 

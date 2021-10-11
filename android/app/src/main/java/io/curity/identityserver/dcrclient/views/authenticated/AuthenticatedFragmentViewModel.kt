@@ -38,6 +38,7 @@ import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 
 class AuthenticatedFragmentViewModel(
     private val events: WeakReference<AuthenticatedFragmentEvents>,
+    private val state: ApplicationStateManager,
     private val appauth: AppAuthHandler,
     val error: ErrorFragmentViewModel) : BaseObservable() {
 
@@ -51,18 +52,18 @@ class AuthenticatedFragmentViewModel(
 
         try {
 
-            if (ApplicationStateManager.tokenResponse?.accessToken != null) {
-                this.accessToken = ApplicationStateManager.tokenResponse?.accessToken!!
+            if (this.state.tokenResponse?.accessToken != null) {
+                this.accessToken = this.state.tokenResponse?.accessToken!!
             }
 
-            if (ApplicationStateManager.tokenResponse?.refreshToken != null) {
-                this.refreshToken = ApplicationStateManager.tokenResponse?.refreshToken!!
+            if (this.state.tokenResponse?.refreshToken != null) {
+                this.refreshToken = this.state.tokenResponse?.refreshToken!!
                 this.hasRefreshToken = true
             }
 
-            if (ApplicationStateManager.tokenResponse?.idToken != null) {
+            if (this.state.tokenResponse?.idToken != null) {
                 this.hasIdToken = true
-                val jwtClaims = readIdTokenClaims(ApplicationStateManager.tokenResponse?.idToken!!)
+                val jwtClaims = readIdTokenClaims(this.state.tokenResponse?.idToken!!)
                 this.subject = jwtClaims.subject
             }
 
@@ -75,12 +76,13 @@ class AuthenticatedFragmentViewModel(
 
     fun refreshAccessToken() {
 
-        val metadata = ApplicationStateManager.metadata!!
-        val registrationResponse = ApplicationStateManager.registrationResponse!!
-        val refreshToken = ApplicationStateManager.tokenResponse!!.refreshToken!!
+        val metadata = this.state.metadata!!
+        val registrationResponse = this.state.registrationResponse!!
+        val refreshToken = this.state.tokenResponse!!.refreshToken!!
         var tokenResponse: TokenResponse?
         this.error.clearDetails()
 
+        val that = this@AuthenticatedFragmentViewModel
         CoroutineScope(Dispatchers.IO).launch {
 
             try {
@@ -92,11 +94,14 @@ class AuthenticatedFragmentViewModel(
                     refreshToken)
 
                 withContext(Dispatchers.Main) {
-                    ApplicationStateManager.tokenResponse = tokenResponse!!
-                    if (tokenResponse == null) {
+
+                    if(tokenResponse != null) {
+                        that.state.saveTokens(tokenResponse!!)
+                        that.processTokens()
+                    } else {
+                        that.state.clearTokens()
                         events.get()?.onLoggedOut()
                     }
-                    processTokens()
                 }
 
             } catch (ex: ApplicationException) {
@@ -111,12 +116,12 @@ class AuthenticatedFragmentViewModel(
     fun startLogout() {
 
         this.error.clearDetails()
-        val registrationResponse = ApplicationStateManager.registrationResponse!!
+        val registrationResponse = this.state.registrationResponse!!
 
         val intent = appauth.getEndSessionRedirectIntent(
-            ApplicationStateManager.metadata!!,
+            this.state.metadata!!,
             registrationResponse.clientId,
-            ApplicationStateManager.idToken)
+            this.state.idToken)
 
         this.events.get()?.startLogoutRedirect(intent)
     }
@@ -125,7 +130,7 @@ class AuthenticatedFragmentViewModel(
 
         try {
             this.appauth.handleEndSessionResponse(AuthorizationException.fromIntent(data))
-            ApplicationStateManager.clearTokens()
+            this.state.clearTokens()
             this.events.get()?.onLoggedOut()
 
         } catch (ex: ApplicationException) {
@@ -139,8 +144,8 @@ class AuthenticatedFragmentViewModel(
             .setSkipSignatureVerification()
             .setRequireSubject()
             .setAllowedClockSkewInSeconds(30)
-            .setExpectedIssuer(ApplicationStateManager.metadata?.discoveryDoc?.issuer)
-            .setExpectedAudience(ApplicationStateManager.registrationResponse?.clientId)
+            .setExpectedIssuer(this.state.metadata?.discoveryDoc?.issuer)
+            .setExpectedAudience(this.state.registrationResponse?.clientId)
             .build()
 
         try {

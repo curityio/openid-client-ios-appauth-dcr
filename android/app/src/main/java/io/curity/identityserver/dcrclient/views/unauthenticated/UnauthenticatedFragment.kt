@@ -54,6 +54,7 @@ class UnauthenticatedFragment : androidx.fragment.app.Fragment(), Unauthenticate
         this.binding.model = UnauthenticatedFragmentViewModel(
             WeakReference(this),
             mainViewModel.config,
+            mainViewModel.state,
             mainViewModel.appauth,
             errorViewModel)
         return this.binding.root
