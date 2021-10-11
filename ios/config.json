@@ -1,5 +1,5 @@
 {
-  "issuer": "https://44c8ff248a18.eu.ngrok.io/oauth/v2/oauth-anonymous",
+  "issuer": "https://edd1e543a2ba.eu.ngrok.io/oauth/v2/oauth-anonymous",
   "registrationClientID": "mobile-dcr-client",
   "redirectUri": "io.curity.dcrclient:/callback",
   "postLogoutRedirectUri": "io.curity.dcrclient:/logoutcallback",

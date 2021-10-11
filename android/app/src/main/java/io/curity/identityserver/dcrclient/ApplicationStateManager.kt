@@ -96,9 +96,9 @@ class ApplicationStateManager(private val context: WeakReference<Context>) {
             .apply()
     }
 
-    private fun deleteRegistration(context: Context) {
+    private fun deleteRegistration() {
 
-        val prefs = context.getSharedPreferences("authState", MODE_PRIVATE)
+        val prefs = this.context.get()!!.getSharedPreferences("authState", MODE_PRIVATE)
         prefs.edit()
             .remove("registration")
             .apply()

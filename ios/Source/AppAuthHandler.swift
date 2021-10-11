@@ -277,13 +277,11 @@ class AppAuthHandler {
      * Do an OpenID Connect end session redirect and remove the SSO cookie
      */
     func performEndSessionRedirect(metadata: OIDServiceConfiguration,
-                                   clientID: String,
                                    idToken: String,
                                    viewController: UIViewController) -> CoFuture<Void> {
         
         let promise = CoPromise<Void>()
-        var extraParams = [String: String]()
-        extraParams["client_id"] = clientID
+        let extraParams = [String: String]()
 
         let (postLogoutRedirectUri, parseError) = self.config.getPostLogoutRedirectUri()
         if postLogoutRedirectUri == nil {
@@ -293,7 +291,7 @@ class AppAuthHandler {
 
         let request = OIDEndSessionRequest(
             configuration: metadata,
-            idTokenHint: "",
+            idTokenHint: idToken,
             postLogoutRedirectURL: postLogoutRedirectUri!,
             additionalParameters: extraParams)
 
@@ -301,6 +299,11 @@ class AppAuthHandler {
         let userAgent = OIDExternalUserAgentIOS(presenting: viewController)
         self.userAgentSession = OIDAuthorizationService.present(request, externalUserAgent: userAgent!) { response, ex in
     
+            
+            if response != nil {
+                Logger.info(data: "End session response received successfully")
+            }
+
             if ex != nil {
                 
                 if self.isUserCancellationErrorCode(ex: ex!) {
@@ -318,7 +321,7 @@ class AppAuthHandler {
                 
                 promise.success(Void())
             }
-            
+    
             self.userAgentSession = nil
         }
         

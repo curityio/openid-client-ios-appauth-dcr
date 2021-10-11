@@ -237,10 +237,9 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
      * Do an OpenID Connect end session redirect and remove the SSO cookie
      */
     fun getEndSessionRedirectIntent(metadata: AuthorizationServiceConfiguration,
-                                    clientID: String,
                                     idToken: String?): Intent {
 
-        val extraParams = mapOf("client_id" to clientID)
+        val extraParams = mutableMapOf<String, String>()
         val request = EndSessionRequest.Builder(metadata)
             .setIdTokenHint(idToken)
             .setPostLogoutRedirectUri(config.getPostLogoutRedirectUri())

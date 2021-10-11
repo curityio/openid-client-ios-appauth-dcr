@@ -120,7 +120,6 @@ class AuthenticatedFragmentViewModel(
 
         val intent = appauth.getEndSessionRedirectIntent(
             this.state.metadata!!,
-            registrationResponse.clientId,
             this.state.idToken)
 
         this.events.get()?.startLogoutRedirect(intent)
