@@ -14,15 +14,15 @@ Then copy a `license.json` file for the Curity Identity Server into the `idsvr` 
 
 ## Quick Start
 
-Deploy the Curity Identity Server with settings preconfigured for DCR.\
+Deploy the Curity Identity Server via Docker with settings preconfigured for DCR.\
 An ngrok tunnel enables mobile connectivity to the Identity Server's endpoints.
 
 ```bash
 ./deploy.sh
 ```
 
-- In XCode 12.5 or later run the app by opening the `ios-app` folder.
-- In Android Studio 4.2 or later run the app by opening the `android-app` folder.
+- In XCode 12.5 or later run the app by opening the `ios` folder.
+- In Android Studio 4.2 or later run the app by opening the `android` folder.
 
 Sign in as the following preconfigured test user account:
 
@@ -59,6 +59,15 @@ Then query the details of the dynamically registered mobile clients:
 
 ```bash
 select * from dynamically_registered_clients;
+```
+
+## Teardown
+
+Run the following commands to free Docker resources:
+
+```bash
+cd idsvr
+docker compose down
 ```
 
 ## More Information
