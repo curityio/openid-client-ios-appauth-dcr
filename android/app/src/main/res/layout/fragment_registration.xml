@@ -14,7 +14,7 @@
             android:id="@+id/fragment_registration_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:name="io.curity.identityserver.client.views.error.ErrorFragment"
+            android:name="io.curity.identityserver.dcrclient.views.error.ErrorFragment"
             android:visibility="@{model.error.hasDetails() ? View.VISIBLE : View.GONE}"
             tools:layout="@layout/fragment_error">
         </androidx.fragment.app.FragmentContainerView>

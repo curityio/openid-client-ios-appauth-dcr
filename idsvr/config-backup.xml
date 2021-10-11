@@ -41,8 +41,6 @@
       <type xmlns:auth="https://curity.se/ns/conf/profile/authentication">auth:authentication-service</type>
       <settings>
         <authentication-service xmlns="https://curity.se/ns/conf/profile/authentication">
-          <sso-cookie-is-session-cookie>false</sso-cookie-is-session-cookie>
-          <persisted-sso-session>true</persisted-sso-session>
           <authenticators>
             <authenticator>
               <id>Username-Password</id>
@@ -307,6 +305,30 @@
           </openid-connect>
           <client-store>
             <config-backed>
+              <client>
+                <id>mobile-client</id>
+                <client-name>mobile-client</client-name>
+                <no-authentication>true</no-authentication>
+                <redirect-uris>io.curity.client:/callback</redirect-uris>
+                <proof-key>
+                  <require-proof-key>true</require-proof-key>
+                </proof-key>
+                <refresh-token-ttl>3600</refresh-token-ttl>
+                <scope>openid</scope>
+                <scope>profile</scope>
+                <user-authentication>
+                  <allowed-authenticators>Username-Password</allowed-authenticators>
+                  <allowed-post-logout-redirect-uris>io.curity.client:/logoutcallback</allowed-post-logout-redirect-uris>
+                </user-authentication>
+                <capabilities>
+                  <code>
+                  </code>
+                </capabilities>
+                <use-pairwise-subject-identifiers>
+                  <sector-identifier>mobile-client</sector-identifier>
+                </use-pairwise-subject-identifiers>
+                <validate-port-on-loopback-interfaces>true</validate-port-on-loopback-interfaces>
+              </client>
               <client>
                 <id>mobile-dcr-client</id>
                 <client-name>mobile-dcr-client</client-name>
