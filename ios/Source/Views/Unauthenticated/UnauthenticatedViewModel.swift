@@ -83,8 +83,7 @@ class UnauthenticatedViewModel: ObservableObject {
                         ).await()
                     }
                     
-                    ApplicationStateManager.tokenResponse = tokenResponse
-                    ApplicationStateManager.idToken = tokenResponse?.idToken
+                    ApplicationStateManager.saveTokens(tokenResponse: tokenResponse!)
                     self.onLoggedIn!()
                 }
 

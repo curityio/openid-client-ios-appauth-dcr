@@ -39,7 +39,7 @@ class ApplicationStateManager(private val context: WeakReference<Context>) {
     init {
 
         // Delete the existing registration settings during development if required
-        // deleteRegistration(context)
+        // deleteRegistration()
 
         val prefs = this.context.get()!!.getSharedPreferences("authState", MODE_PRIVATE)
         val registration = prefs.getString("registration", null)

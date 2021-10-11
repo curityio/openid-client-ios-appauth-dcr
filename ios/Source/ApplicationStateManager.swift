@@ -24,10 +24,16 @@ struct ApplicationStateManager {
     static var idToken: String? = nil
     private static var storageKey = "io.curity.dcrclient"
     
+    /*
+     * Load any existing state
+     */
     static func load() {
 
         // During development you can force a new registration by deleting existing settings
-        // ApplicationStateManager.delete()
+        // ApplicationStateManager.deleteRegistration()
+        
+        self.authState = OIDAuthState(authorizationResponse: nil, tokenResponse: nil, registrationResponse: nil)
+        self.idToken = KeychainWrapper.standard.string(forKey: self.storageKey + ".idtoken")
         
         let data = KeychainWrapper.standard.data(forKey: self.storageKey + ".registration")
         if data != nil {
@@ -36,48 +42,57 @@ struct ApplicationStateManager {
 
                 let registrationResponse = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data!) as? OIDRegistrationResponse
                 if registrationResponse != nil {
-                    self.authState = OIDAuthState(registrationResponse: registrationResponse!)
+                    self.authState!.update(with: registrationResponse)
                 }
             } catch {
                 Logger.error(data: "Problem encountered loading application state: \(error)")
             }
         }
-
-        self.idToken = KeychainWrapper.standard.string(forKey: self.storageKey + ".idtoken")
     }
-
-    static func saveRegistration() {
+    
+    /*
+     * The code example saves the id token so that logout works after a restart
+     */
+    static func saveTokens(tokenResponse: OIDTokenResponse) {
         
-        if self.authState?.lastRegistrationResponse != nil {
-            
-            do {
-                let data = try NSKeyedArchiver.archivedData(withRootObject: self.authState!.lastRegistrationResponse!, requiringSecureCoding: false)
-                KeychainWrapper.standard.set(data, forKey: self.storageKey + ".registration")
-
-            } catch {
-                Logger.error(data: "Problem encountered saving application state: \(error)")
-            }
-        }
-        
-        if idToken != nil {
+        self.authState?.update(with: tokenResponse, error: nil)
+        if tokenResponse.idToken != nil {
+            self.idToken = tokenResponse.idToken
             KeychainWrapper.standard.set(idToken!, forKey: self.storageKey + ".idtoken")
-        } else {
-            KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".idtoken")
         }
     }
     
-    static func saveTokens() {
+    /*
+     * Registration data must be saved across application restarts
+     */
+    static func saveRegistration(registrationResponse: OIDRegistrationResponse) {
         
-        if idToken != nil {
-            KeychainWrapper.standard.set(idToken!, forKey: self.storageKey + ".idtoken")
-        } else {
-            KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".idtoken")
+        do {
+            self.authState!.update(with: registrationResponse)
+            let data = try NSKeyedArchiver.archivedData(withRootObject: registrationResponse, requiringSecureCoding: false)
+            KeychainWrapper.standard.set(data, forKey: self.storageKey + ".registration")
+
+        } catch {
+            Logger.error(data: "Problem encountered saving application state: \(error)")
         }
     }
     
-    static func delete() {
-        KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".registration")
+    /*
+     * Clear tokens after logout or when the session expires
+     */
+    static func clearTokens() {
+        
+        let lastRegistrationResponse = self.authState!.lastRegistrationResponse
+        self.authState = OIDAuthState(authorizationResponse: nil, tokenResponse: nil, registrationResponse: nil)
+        self.authState!.update(with: lastRegistrationResponse)
+        self.idToken = nil
         KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".idtoken")
+    }
+    
+    static func deleteRegistration() {
+        
+        self.authState = OIDAuthState(authorizationResponse: nil, tokenResponse: nil, registrationResponse: nil)
+        KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".registration")
     }
 
     static var metadata: OIDServiceConfiguration? {
@@ -93,19 +108,11 @@ struct ApplicationStateManager {
         get {
             return self.authState?.lastRegistrationResponse
         }
-        set(value) {
-            self.authState = OIDAuthState(registrationResponse: value!)
-            ApplicationStateManager.saveRegistration()
-        }
     }
     
     static var tokenResponse: OIDTokenResponse? {
         get {
             return self.authState!.lastTokenResponse
-        }
-        set(value) {
-            self.authState?.update(with: value, error: nil)
-            ApplicationStateManager.saveTokens()
         }
     }
 }

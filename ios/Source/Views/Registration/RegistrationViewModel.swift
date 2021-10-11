@@ -88,8 +88,8 @@ class RegistrationViewModel: ObservableObject {
                         registrationResponse = try self.appauth!.registerClient(metadata: metadata!, accessToken: dcrAccessToken!)
                             .await()
                     }
-                    ApplicationStateManager.registrationResponse = registrationResponse
-                    
+                    ApplicationStateManager.saveRegistration(registrationResponse: registrationResponse!)
+
                     // Tell the main view to update
                     self.onRegistered!()
                 }

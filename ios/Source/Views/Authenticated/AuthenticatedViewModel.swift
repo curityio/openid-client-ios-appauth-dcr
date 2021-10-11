@@ -114,11 +114,13 @@ class AuthenticatedViewModel: ObservableObject {
                         refreshToken: refreshToken).await()
                 }
                 
-                ApplicationStateManager.tokenResponse = tokenResponse
-                if (tokenResponse == nil) {
+                if tokenResponse != nil {
+                    ApplicationStateManager.saveTokens(tokenResponse: tokenResponse!)
+                    self.processTokens()
+                } else {
+                    ApplicationStateManager.clearTokens()
                     self.onLoggedOut!()
                 }
-                self.processTokens()
 
             } catch {
                 
@@ -148,8 +150,7 @@ class AuthenticatedViewModel: ObservableObject {
                     viewController: self.getViewController()
                 ).await()
 
-                ApplicationStateManager.tokenResponse = nil
-                ApplicationStateManager.idToken = nil
+                ApplicationStateManager.clearTokens()
                 self.onLoggedOut!()
 
             } catch {
