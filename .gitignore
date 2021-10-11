@@ -2,27 +2,27 @@
 idsvr/license.json
 
 # iOS
-ios/xcuserdata/
-ios/*.hmap
-ios/*.ipa
-ios/*.dSYM.zip
-ios/*.dSYM
-ios/build/
+xcuserdata/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+build/
 
 # Android
-android/.idea/*
-android/*.apk
-android/*.aar
-android/*.ap_
-android/*.aab
-android/*.class
-android/bin/
-android/gen/
-android/out/
-android/.gradle/
-android/build/
-android/app/build/
-android/proguard/
-android/*.log
-android/*.iml
-android/.gradle
+.idea/*
+*.apk
+*.aar
+*.ap_
+*.aab
+*.class
+bin/
+gen/
+out/
+.gradle/
+build/
+app/build/
+proguard/
+*.log
+*.iml
+.gradle
