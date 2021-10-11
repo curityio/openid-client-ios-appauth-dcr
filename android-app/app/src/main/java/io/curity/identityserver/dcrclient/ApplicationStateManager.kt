@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client
+package io.curity.identityserver.dcrclient
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE

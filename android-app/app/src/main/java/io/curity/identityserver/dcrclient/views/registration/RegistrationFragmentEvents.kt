@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views.registration
+package io.curity.identityserver.dcrclient.views.registration
 
 import android.content.Intent
 

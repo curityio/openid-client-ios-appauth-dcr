@@ -14,22 +14,22 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client
+package io.curity.identityserver.dcrclient
 
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import io.curity.identityserver.client.configuration.ApplicationConfig
-import io.curity.identityserver.client.errors.ApplicationException
-import io.curity.identityserver.client.errors.GENERIC_ERROR
-import io.curity.identityserver.client.errors.ServerCommunicationException
-import net.openid.appauth.*
-import net.openid.appauth.AuthorizationServiceConfiguration.fetchFromIssuer
-import io.curity.identityserver.client.utilities.HttpHelper
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import net.openid.appauth.*
+import net.openid.appauth.AuthorizationServiceConfiguration.fetchFromIssuer
+import io.curity.identityserver.dcrclient.configuration.ApplicationConfig
+import io.curity.identityserver.dcrclient.errors.ApplicationException
+import io.curity.identityserver.dcrclient.errors.GENERIC_ERROR
+import io.curity.identityserver.dcrclient.errors.ServerCommunicationException
+import io.curity.identityserver.dcrclient.utilities.HttpHelper
 
 /*
  * Manage AppAuth integration in one class in order to reduce code in the rest of the app
@@ -192,13 +192,14 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
      */
     suspend fun refreshAccessToken(
         metadata: AuthorizationServiceConfiguration,
-        registrationResponse: RegistrationResponse,
+        clientID: String,
+        clientSecret: String,
         refreshToken: String): TokenResponse? {
 
         return suspendCoroutine { continuation ->
 
-            val extraParams = mapOf("client_secret" to registrationResponse.clientSecret)
-            val tokenRequest = TokenRequest.Builder(metadata, registrationResponse.clientId)
+            val extraParams = mapOf("client_secret" to clientSecret)
+            val tokenRequest = TokenRequest.Builder(metadata, clientID)
                 .setGrantType(GrantTypeValues.REFRESH_TOKEN)
                 .setRefreshToken(refreshToken)
                 .setAdditionalParameters(extraParams)
@@ -236,10 +237,10 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
      * Do an OpenID Connect end session redirect and remove the SSO cookie
      */
     fun getEndSessionRedirectIntent(metadata: AuthorizationServiceConfiguration,
-                                    registrationResponse: RegistrationResponse,
+                                    clientID: String,
                                     idToken: String?): Intent {
 
-        val extraParams = mapOf("client_id" to registrationResponse.clientId)
+        val extraParams = mapOf("client_id" to clientID)
         val request = EndSessionRequest.Builder(metadata)
             .setIdTokenHint(idToken)
             .setPostLogoutRedirectUri(config.getPostLogoutRedirectUri())

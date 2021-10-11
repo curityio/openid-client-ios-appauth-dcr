@@ -14,14 +14,14 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views
+package io.curity.identityserver.dcrclient.views
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import io.curity.identityserver.client.AppAuthHandler
-import io.curity.identityserver.client.ApplicationStateManager
-import io.curity.identityserver.client.configuration.ApplicationConfig
-import io.curity.identityserver.client.configuration.ApplicationConfigLoader
+import io.curity.identityserver.dcrclient.AppAuthHandler
+import io.curity.identityserver.dcrclient.ApplicationStateManager
+import io.curity.identityserver.dcrclient.configuration.ApplicationConfig
+import io.curity.identityserver.dcrclient.configuration.ApplicationConfigLoader
 import java.lang.ref.WeakReference
 
 class MainActivityViewModel() : ViewModel() {

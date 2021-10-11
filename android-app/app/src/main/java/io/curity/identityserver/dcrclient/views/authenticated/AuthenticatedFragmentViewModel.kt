@@ -14,8 +14,12 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views.authenticated;
+package io.curity.identityserver.dcrclient.views.authenticated;
 
+import android.content.ContentValues
+import android.content.Intent
+import android.util.Log
+import androidx.databinding.BaseObservable
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,23 +27,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.TokenResponse
-import android.content.ContentValues
-import android.content.Intent
-import android.util.Log
-import androidx.databinding.BaseObservable
 import org.jose4j.jwt.JwtClaims
 import org.jose4j.jwt.consumer.InvalidJwtException
 import org.jose4j.jwt.consumer.JwtConsumerBuilder
-import io.curity.identityserver.client.AppAuthHandler
-import io.curity.identityserver.client.ApplicationStateManager
-import io.curity.identityserver.client.configuration.ApplicationConfig
-import io.curity.identityserver.client.errors.ApplicationException
-import io.curity.identityserver.client.errors.InvalidIdTokenException
-import io.curity.identityserver.client.views.error.ErrorFragmentViewModel
+import io.curity.identityserver.dcrclient.AppAuthHandler
+import io.curity.identityserver.dcrclient.ApplicationStateManager
+import io.curity.identityserver.dcrclient.errors.ApplicationException
+import io.curity.identityserver.dcrclient.errors.InvalidIdTokenException
+import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 
 class AuthenticatedFragmentViewModel(
     private val events: WeakReference<AuthenticatedFragmentEvents>,
-    private val config: ApplicationConfig,
     private val appauth: AppAuthHandler,
     val error: ErrorFragmentViewModel) : BaseObservable() {
 
@@ -89,7 +87,8 @@ class AuthenticatedFragmentViewModel(
 
                 tokenResponse = this@AuthenticatedFragmentViewModel.appauth.refreshAccessToken(
                     metadata,
-                    registrationResponse,
+                    registrationResponse.clientId,
+                    registrationResponse.clientSecret!!,
                     refreshToken)
 
                 withContext(Dispatchers.Main) {
@@ -112,9 +111,11 @@ class AuthenticatedFragmentViewModel(
     fun startLogout() {
 
         this.error.clearDetails()
+        val registrationResponse = ApplicationStateManager.registrationResponse!!
+
         val intent = appauth.getEndSessionRedirectIntent(
             ApplicationStateManager.metadata!!,
-            ApplicationStateManager.registrationResponse!!,
+            registrationResponse.clientId,
             ApplicationStateManager.idToken)
 
         this.events.get()?.startLogoutRedirect(intent)

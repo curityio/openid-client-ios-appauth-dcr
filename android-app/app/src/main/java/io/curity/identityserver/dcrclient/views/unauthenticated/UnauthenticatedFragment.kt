@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views.unauthenticated
+package io.curity.identityserver.dcrclient.views.unauthenticated
 
 import android.app.Activity
 import android.content.Intent
@@ -25,11 +25,11 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import io.curity.identityserver.client.databinding.FragmentUnauthenticatedBinding
-import io.curity.identityserver.client.views.MainActivity
-import io.curity.identityserver.client.views.MainActivityViewModel
-import io.curity.identityserver.client.views.error.ErrorFragmentViewModel
 import java.lang.ref.WeakReference
+import io.curity.identityserver.dcrclient.databinding.FragmentUnauthenticatedBinding
+import io.curity.identityserver.dcrclient.views.MainActivity
+import io.curity.identityserver.dcrclient.views.MainActivityViewModel
+import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 
 class UnauthenticatedFragment : androidx.fragment.app.Fragment(), UnauthenticatedFragmentEvents {
 

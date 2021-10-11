@@ -14,14 +14,14 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views.error
+package io.curity.identityserver.dcrclient.views.error
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import io.curity.identityserver.client.databinding.FragmentErrorBinding
+import io.curity.identityserver.dcrclient.databinding.FragmentErrorBinding
 
 class ErrorFragment : androidx.fragment.app.Fragment() {
 

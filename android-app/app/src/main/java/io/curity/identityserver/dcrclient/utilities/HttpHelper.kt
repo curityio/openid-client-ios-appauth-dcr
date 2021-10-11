@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.utilities
+package io.curity.identityserver.dcrclient.utilities
 
 import java.io.IOException
 import java.util.concurrent.TimeUnit

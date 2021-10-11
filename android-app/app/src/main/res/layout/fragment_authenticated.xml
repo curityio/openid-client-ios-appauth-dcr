@@ -3,7 +3,7 @@
         xmlns:tools="http://schemas.android.com/tools">
     <data>
         <import type="android.view.View"/>
-        <variable name="model" type="io.curity.identityserver.client.views.authenticated.AuthenticatedFragmentViewModel" />
+        <variable name="model" type="io.curity.identityserver.dcrclient.views.authenticated.AuthenticatedFragmentViewModel" />
     </data>
     <LinearLayout
         android:layout_width="match_parent"

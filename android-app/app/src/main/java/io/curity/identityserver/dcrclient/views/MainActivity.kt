@@ -14,16 +14,16 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views
+package io.curity.identityserver.dcrclient.views
 
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.NavHostFragment
-import io.curity.identityserver.client.ApplicationStateManager
-import io.curity.identityserver.client.R
-import io.curity.identityserver.client.databinding.ActivityMainBinding
+import io.curity.identityserver.dcrclient.ApplicationStateManager
+import io.curity.identityserver.dcrclient.R
+import io.curity.identityserver.dcrclient.databinding.ActivityMainBinding
 import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity() {

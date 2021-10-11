@@ -14,13 +14,13 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views.authenticated
+package io.curity.identityserver.dcrclient.views.unauthenticated
 
 import android.content.Intent
 
-interface AuthenticatedFragmentEvents {
+interface UnauthenticatedFragmentEvents {
 
-    fun startLogoutRedirect(intent: Intent)
+    fun startLoginRedirect(intent: Intent)
 
-    fun onLoggedOut()
+    fun onLoggedIn()
 }

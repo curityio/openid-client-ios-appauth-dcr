@@ -14,10 +14,9 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.configuration
+package io.curity.identityserver.dcrclient.configuration
 
 import android.net.Uri
-import java.net.URL
 
 /*
  * The fixed OAuth configuration that is sent in a dynamic client registration request

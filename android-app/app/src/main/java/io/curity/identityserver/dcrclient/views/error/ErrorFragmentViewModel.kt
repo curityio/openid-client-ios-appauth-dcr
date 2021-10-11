@@ -14,13 +14,13 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views.error
+package io.curity.identityserver.dcrclient.views.error
 
 import androidx.databinding.Observable
 import androidx.databinding.PropertyChangeRegistry
 import androidx.lifecycle.ViewModel
-import io.curity.identityserver.client.errors.ApplicationException
-import io.curity.identityserver.client.errors.GENERIC_ERROR
+import io.curity.identityserver.dcrclient.errors.ApplicationException
+import io.curity.identityserver.dcrclient.errors.GENERIC_ERROR
 
 class ErrorFragmentViewModel : ViewModel(), Observable {
 

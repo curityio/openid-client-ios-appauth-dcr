@@ -1,8 +1,8 @@
-package io.curity.identityserver.client.configuration
+package io.curity.identityserver.dcrclient.configuration
 
 import android.content.Context
 import com.google.gson.Gson
-import io.curity.identityserver.client.R
+import io.curity.identityserver.dcrclient.R
 import okio.Buffer
 import okio.buffer
 import okio.source

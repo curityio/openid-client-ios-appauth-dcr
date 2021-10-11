@@ -14,8 +14,10 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views.unauthenticated;
+package io.curity.identityserver.dcrclient.views.unauthenticated;
 
+import android.content.Intent
+import androidx.databinding.BaseObservable
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,13 +26,11 @@ import kotlinx.coroutines.withContext
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.TokenResponse
-import android.content.Intent
-import androidx.databinding.BaseObservable
-import io.curity.identityserver.client.AppAuthHandler
-import io.curity.identityserver.client.ApplicationStateManager
-import io.curity.identityserver.client.configuration.ApplicationConfig
-import io.curity.identityserver.client.errors.ApplicationException
-import io.curity.identityserver.client.views.error.ErrorFragmentViewModel
+import io.curity.identityserver.dcrclient.AppAuthHandler
+import io.curity.identityserver.dcrclient.ApplicationStateManager
+import io.curity.identityserver.dcrclient.configuration.ApplicationConfig
+import io.curity.identityserver.dcrclient.errors.ApplicationException
+import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 
 class UnauthenticatedFragmentViewModel(
     private val events: WeakReference<UnauthenticatedFragmentEvents>,

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.errors
+package io.curity.identityserver.dcrclient.errors
 
 const val GENERIC_ERROR = "Unknown Error"
 

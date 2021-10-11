@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.curity.identityserver.client.views.authenticated
+package io.curity.identityserver.dcrclient.views.registration
 
 import android.app.Activity
 import android.content.Intent
@@ -25,19 +25,19 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import io.curity.identityserver.client.databinding.FragmentAuthenticatedBinding
-import io.curity.identityserver.client.views.MainActivity
-import io.curity.identityserver.client.views.MainActivityViewModel
-import io.curity.identityserver.client.views.error.ErrorFragmentViewModel
 import java.lang.ref.WeakReference
+import io.curity.identityserver.dcrclient.databinding.FragmentRegistrationBinding
+import io.curity.identityserver.dcrclient.views.MainActivity
+import io.curity.identityserver.dcrclient.views.MainActivityViewModel
+import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 
-class AuthenticatedFragment : androidx.fragment.app.Fragment(), AuthenticatedFragmentEvents {
+class RegistrationFragment : androidx.fragment.app.Fragment(), RegistrationFragmentEvents {
 
-    private lateinit var binding: FragmentAuthenticatedBinding
+    private lateinit var binding: FragmentRegistrationBinding
 
-    private val logoutLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val loginLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            this.binding.model!!.endLogout(result.data!!)
+            this.binding.model!!.endLogin(result.data!!)
         }
     }
 
@@ -50,8 +50,8 @@ class AuthenticatedFragment : androidx.fragment.app.Fragment(), AuthenticatedFra
         val mainViewModel: MainActivityViewModel by activityViewModels()
         val errorViewModel: ErrorFragmentViewModel by viewModels()
 
-        this.binding = FragmentAuthenticatedBinding.inflate(inflater, container, false)
-        this.binding.model = AuthenticatedFragmentViewModel(
+        this.binding = FragmentRegistrationBinding.inflate(inflater, container, false)
+        this.binding.model = RegistrationFragmentViewModel(
             WeakReference(this),
             mainViewModel.config,
             mainViewModel.appauth,
@@ -59,17 +59,12 @@ class AuthenticatedFragment : androidx.fragment.app.Fragment(), AuthenticatedFra
         return this.binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        this.binding.model!!.processTokens()
+    override fun startLoginRedirect(intent: Intent) {
+        this.loginLauncher.launch(intent)
     }
 
-    override fun startLogoutRedirect(intent: Intent) {
-        this.logoutLauncher.launch(intent)
-    }
-
-    override fun onLoggedOut() {
+    override fun onRegistered() {
         val mainActivity = this.activity as MainActivity
-        mainActivity.onLoggedOutNavigate()
+        mainActivity.onRegisteredNavigate()
     }
 }
