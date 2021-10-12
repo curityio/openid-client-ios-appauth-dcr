@@ -1,0 +1,7 @@
+{
+  "issuer": "https://baa467f55bc7.eu.ngrok.io/oauth/v2/oauth-anonymous",
+  "registrationClientID": "mobile-dcr-client",
+  "redirectUri": "io.curity.dcrclient:/callback",
+  "postLogoutRedirectUri": "io.curity.dcrclient:/logoutcallback",
+  "scope": "openid profile"
+}
