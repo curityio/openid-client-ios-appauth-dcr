@@ -61,9 +61,9 @@ class AuthenticatedFragmentViewModel(
                 this.hasRefreshToken = true
             }
 
-            if (this.state.tokenResponse?.idToken != null) {
+            if (this.state.idToken != null) {
                 this.hasIdToken = true
-                val jwtClaims = readIdTokenClaims(this.state.tokenResponse?.idToken!!)
+                val jwtClaims = readIdTokenClaims(this.state.idToken!!)
                 this.subject = jwtClaims.subject
             }
 

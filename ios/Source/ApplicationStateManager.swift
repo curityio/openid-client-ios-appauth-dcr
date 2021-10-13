@@ -24,17 +24,17 @@ class ApplicationStateManager {
     var idToken: String? = nil
     var isFirstRun: Bool
     private var storageKey = "io.curity.dcrclient"
-    
+
     /*
      * Load any existing state
      */
     init() {
         
         // During development you can force a new registration by deleting existing settings
+        // This can be required if you have redeployed the Identity Server and reset its data
         // KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".registration")
         
         self.authState = OIDAuthState(authorizationResponse: nil, tokenResponse: nil, registrationResponse: nil)
-        self.idToken = KeychainWrapper.standard.string(forKey: self.storageKey + ".idtoken")
         self.isFirstRun = true
 
         let data = KeychainWrapper.standard.data(forKey: self.storageKey + ".registration")
@@ -45,6 +45,7 @@ class ApplicationStateManager {
                 let registrationResponse = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data!) as? OIDRegistrationResponse
                 if registrationResponse != nil {
                     self.authState!.update(with: registrationResponse)
+                    Logger.debug(data: "Loaded dynamic client: ID: \(registrationResponse!.clientID), Secret: \(registrationResponse!.clientSecret!)")
                     self.isFirstRun = false
                 }
             } catch {
@@ -58,11 +59,14 @@ class ApplicationStateManager {
      */
     func saveTokens(tokenResponse: OIDTokenResponse) {
         
-        self.authState?.update(with: tokenResponse, error: nil)
-        if tokenResponse.idToken != nil {
+        // When refreshing tokens, the Curity Identity Server does not issue a new ID token
+        // The AppAuth code does not allow us to update the token response with the original ID token
+        // Therefore we store the ID token separately
+        if (tokenResponse.idToken != nil) {
             self.idToken = tokenResponse.idToken
-            KeychainWrapper.standard.set(idToken!, forKey: self.storageKey + ".idtoken")
         }
+    
+        self.authState?.update(with: tokenResponse, error: nil)
     }
     
     /*

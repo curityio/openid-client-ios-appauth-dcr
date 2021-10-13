@@ -79,9 +79,9 @@ class AuthenticatedViewModel: ObservableObject {
             self.refreshToken = self.state!.tokenResponse!.refreshToken!
         }
         
-        if self.state!.tokenResponse?.idToken != nil {
+        if self.state!.idToken != nil {
             
-            let idToken = self.state!.tokenResponse!.idToken!
+            let idToken = self.state!.idToken!
             self.hasIdToken = true
             
             do {

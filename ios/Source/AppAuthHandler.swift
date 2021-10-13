@@ -54,7 +54,6 @@ class AppAuthHandler {
                 }
 
                 Logger.info(data: "Metadata retrieved successfully")
-                Logger.debug(data: metadata!.description)
                 promise.success(metadata!)
 
             } else {
@@ -109,10 +108,6 @@ class AppAuthHandler {
             if response != nil {
                 
                 Logger.info(data: "Authorization response received successfully")
-                let code = response!.authorizationCode == nil ? "" : response!.authorizationCode!
-                let state = response!.state == nil ? "" : response!.state!
-                Logger.debug(data: "CODE: \(code), STATE: \(state)")
-
                 promise.success(response!)
 
             } else {
@@ -158,11 +153,6 @@ class AppAuthHandler {
             if tokenResponse != nil {
 
                 Logger.info(data: "Authorization code grant response received successfully")
-                let accessToken = tokenResponse!.accessToken == nil ? "" : tokenResponse!.accessToken!
-                let refreshToken = tokenResponse!.refreshToken == nil ? "" : tokenResponse!.refreshToken!
-                let idToken = tokenResponse!.idToken == nil ? "" : tokenResponse!.idToken!
-                Logger.debug(data: "AT: \(accessToken), RT: \(refreshToken), IDT: \(idToken)" )
-
                 promise.success(tokenResponse!)
 
             } else {
@@ -210,8 +200,7 @@ class AppAuthHandler {
                 let registrationResponse = response!
                 let clientSecret = registrationResponse.clientSecret == nil ? "" : registrationResponse.clientSecret!
                 Logger.info(data: "Registration data retrieved successfully")
-                
-                Logger.debug(data: "ID: \(registrationResponse.clientID), Secret: \(clientSecret)")
+                Logger.debug(data: "Created dynamic client: ID: \(registrationResponse.clientID), Secret: \(clientSecret)")
                 promise.success(registrationResponse)
 
             } else {
@@ -252,11 +241,6 @@ class AppAuthHandler {
             if tokenResponse != nil {
 
                 Logger.info(data: "Refresh token code grant response received successfully")
-                let accessToken = tokenResponse!.accessToken == nil ? "" : tokenResponse!.accessToken!
-                let refreshToken = tokenResponse!.refreshToken == nil ? "" : tokenResponse!.refreshToken!
-                let idToken = tokenResponse!.idToken == nil ? "" : tokenResponse!.idToken!
-                Logger.debug(data: "AT: \(accessToken), RT: \(refreshToken), IDT: \(idToken)" )
-
                 promise.success(tokenResponse!)
 
             } else {
@@ -346,7 +330,7 @@ class AppAuthHandler {
     private func isRefreshTokenExpiredErrorCode(ex: Error) -> Bool {
 
         let error = ex as NSError
-        return error.domain == OIDGeneralErrorDomain && error.code == OIDErrorCode.userCanceledAuthorizationFlow.rawValue
+        return error.domain == OIDOAuthTokenErrorDomain && error.code == OIDErrorCodeOAuth.invalidGrant.rawValue
     }
 
     /*

@@ -16,8 +16,10 @@
 
 package io.curity.identityserver.dcrclient
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.util.Log
 import java.lang.ref.WeakReference
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationServiceConfiguration
@@ -44,30 +46,30 @@ class ApplicationStateManager(private val context: WeakReference<Context>) {
 
         val prefs = this.context.get()!!.getSharedPreferences("authState", MODE_PRIVATE)
         val registration = prefs.getString("registration", null)
-        this.idToken = prefs.getString("idToken", null)
 
         if (registration != null) {
             val lastRegistrationResponse = RegistrationResponse.jsonDeserialize(registration)
             this.authState = AuthState(lastRegistrationResponse)
+            Log.d(ContentValues.TAG, "Loaded dynamic client: ${lastRegistrationResponse.clientId}, Secret: ${lastRegistrationResponse.clientSecret}")
+
         }
 
         this.isFirstRun = registration == null
     }
 
     /*
-     * The code example saves the id token so that logout works after a restart
+     * Manage storing or updating the token response
      */
     fun saveTokens(tokenResponse: TokenResponse) {
 
-        this.authState!!.update(tokenResponse, null)
+        // When refreshing tokens, the Curity Identity Server does not issue a new ID token
+        // The AppAuth code does not allow us to update the token response with the original ID token
+        // Therefore we store the ID token separately
         if (tokenResponse.idToken != null) {
-
             this.idToken = tokenResponse.idToken
-            val prefs = this.context.get()!!.getSharedPreferences("authState", MODE_PRIVATE)
-            prefs.edit()
-                .putString("idToken", this.idToken)
-                .apply()
         }
+
+        this.authState!!.update(tokenResponse, null)
     }
 
     /*
@@ -80,11 +82,6 @@ class ApplicationStateManager(private val context: WeakReference<Context>) {
         this.authState = AuthState(metadata!!)
         this.authState!!.update(lastRegistrationResponse)
         this.idToken = null
-
-        val prefs = this.context.get()!!.getSharedPreferences("authState", MODE_PRIVATE)
-        prefs.edit()
-            .remove("idToken")
-            .apply()
     }
 
     /*

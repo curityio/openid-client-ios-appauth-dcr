@@ -58,7 +58,6 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
                         }
 
                         Log.i(ContentValues.TAG, "Metadata retrieved successfully")
-                        Log.d(ContentValues.TAG, metadata.toJsonString())
                         continuation.resume(metadata)
                     }
                     else -> {
@@ -111,7 +110,6 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
         }
 
         Log.i(ContentValues.TAG, "Authorization response received successfully")
-        Log.d(ContentValues.TAG, "CODE: ${response.authorizationCode}, STATE: ${response.state}")
         return response
     }
 
@@ -135,7 +133,6 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
                 when {
                     tokenResponse != null -> {
                         Log.i(ContentValues.TAG, "Authorization code grant response received successfully")
-                        Log.d(ContentValues.TAG, "AT: ${tokenResponse.accessToken}, RT: ${tokenResponse.refreshToken}, IDT: ${tokenResponse.idToken}" )
                         continuation.resume(tokenResponse)
                     }
                     else -> {
@@ -180,7 +177,7 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
                 .fromResponseJsonString(responseData).build();
 
             Log.i(ContentValues.TAG, "Registration data retrieved successfully")
-            Log.d(ContentValues.TAG, "ID: ${registrationResponse.clientId}, Secret: ${registrationResponse.clientSecret}")
+            Log.d(ContentValues.TAG, "Created dynamic client: ID: ${registrationResponse.clientId}, Secret: ${registrationResponse.clientSecret}")
             return registrationResponse
 
         } catch (ex: Exception) {
@@ -214,7 +211,6 @@ class AppAuthHandler(private val config: ApplicationConfig, val context: Context
                 when {
                     tokenResponse != null -> {
                         Log.i(ContentValues.TAG, "Refresh token grant response received successfully")
-                        Log.d(ContentValues.TAG, "AT: ${tokenResponse.accessToken}, RT: ${tokenResponse.refreshToken}, IDT: ${tokenResponse.idToken}" )
                         continuation.resume(tokenResponse)
                     }
                     else -> {
