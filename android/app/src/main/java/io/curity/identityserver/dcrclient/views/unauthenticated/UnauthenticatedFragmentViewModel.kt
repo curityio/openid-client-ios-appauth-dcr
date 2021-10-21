@@ -127,7 +127,7 @@ class UnauthenticatedFragmentViewModel(
 
     private fun isForcedLogin(): Boolean {
 
-        // On the first run the user authenticates to register and then single signs on
+        // On the first run the user must perform an initial login to register, then must single sign on to authenticate
         if (this.state.isFirstRun) {
             return false
         }
