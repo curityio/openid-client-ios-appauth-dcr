@@ -19,7 +19,7 @@ import SwiftKeychainWrapper
 
 class ApplicationStateManager {
     
-    private var authState: OIDAuthState? = nil
+    private var authState: OIDAuthState
     private var metadataValue: OIDServiceConfiguration? = nil
     var idToken: String? = nil
     var isFirstRun: Bool
@@ -30,9 +30,8 @@ class ApplicationStateManager {
      */
     init() {
         
-        // During development you can force a new registration by deleting existing settings
-        // This can be required if you have redeployed the Identity Server and reset its data
-        KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".registration")
+        // During development, when the database is recreated, this can be used to delete old registrations from shared preferences
+        // KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".registration")
         
         self.authState = OIDAuthState(authorizationResponse: nil, tokenResponse: nil, registrationResponse: nil)
         self.isFirstRun = true
@@ -44,7 +43,7 @@ class ApplicationStateManager {
 
                 let registrationResponse = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data!) as? OIDRegistrationResponse
                 if registrationResponse != nil {
-                    self.authState!.update(with: registrationResponse)
+                    self.authState.update(with: registrationResponse)
                     Logger.debug(data: "Loaded dynamic client: ID: \(registrationResponse!.clientID), Secret: \(registrationResponse!.clientSecret!)")
                     self.isFirstRun = false
                 }
@@ -66,7 +65,7 @@ class ApplicationStateManager {
             self.idToken = tokenResponse.idToken
         }
     
-        self.authState?.update(with: tokenResponse, error: nil)
+        self.authState.update(with: tokenResponse, error: nil)
         
         /* Tokens can be optionally stored in mobile secure storage, though this may not be appropriate for high security apps
          */
@@ -78,7 +77,7 @@ class ApplicationStateManager {
     func saveRegistration(registrationResponse: OIDRegistrationResponse) {
         
         do {
-            self.authState!.update(with: registrationResponse)
+            self.authState.update(with: registrationResponse)
             let data = try NSKeyedArchiver.archivedData(withRootObject: registrationResponse, requiringSecureCoding: false)
             KeychainWrapper.standard.set(data, forKey: self.storageKey + ".registration")
 
@@ -92,9 +91,9 @@ class ApplicationStateManager {
      */
     func clearTokens() {
         
-        let lastRegistrationResponse = self.authState!.lastRegistrationResponse
+        let lastRegistrationResponse = self.authState.lastRegistrationResponse
         self.authState = OIDAuthState(authorizationResponse: nil, tokenResponse: nil, registrationResponse: nil)
-        self.authState!.update(with: lastRegistrationResponse)
+        self.authState.update(with: lastRegistrationResponse)
         self.idToken = nil
         KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".idtoken")
     }
@@ -110,13 +109,13 @@ class ApplicationStateManager {
     
     var registrationResponse: OIDRegistrationResponse? {
         get {
-            return self.authState?.lastRegistrationResponse
+            return self.authState.lastRegistrationResponse
         }
     }
     
     var tokenResponse: OIDTokenResponse? {
         get {
-            return self.authState!.lastTokenResponse
+            return self.authState.lastTokenResponse
         }
     }
 }

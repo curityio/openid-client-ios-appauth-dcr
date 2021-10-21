@@ -20,34 +20,24 @@ import AppAuth
 
 class UnauthenticatedViewModel: ObservableObject {
 
-    private var config: ApplicationConfig?
-    private var state: ApplicationStateManager?
-    private var appauth: AppAuthHandler?
-    private var onLoggedIn: (() -> Void)?
+    private let config: ApplicationConfig
+    private let state: ApplicationStateManager
+    private let appauth: AppAuthHandler
+    private let onLoggedIn: (() -> Void)
 
-    @Published var isLoaded: Bool
     @Published var error: ApplicationError?
     
-    init() {
-        self.config = nil
-        self.state = nil
-        self.appauth = nil
-        self.onLoggedIn = nil
-        self.error = nil
-        self.isLoaded = false
-    }
-    
-    func load(
+    init(
         config: ApplicationConfig,
         state: ApplicationStateManager,
         appauth: AppAuthHandler,
         onLoggedIn: @escaping () -> Void) {
-
+            
         self.config = config
         self.state = state
         self.appauth = appauth
         self.onLoggedIn = onLoggedIn
-        self.isLoaded = true
+        self.error = nil
     }
     
     /*
@@ -60,22 +50,22 @@ class UnauthenticatedViewModel: ObservableObject {
             do {
 
                 self.error = nil
-                let registrationResponse = self.state!.registrationResponse!
-                var metadata = self.state!.metadata
+                let registrationResponse = self.state.registrationResponse!
+                var metadata = self.state.metadata
 
                 // First get metadata if required
                 if metadata == nil {
                     try DispatchQueue.global().await {
-                        metadata = try self.appauth!.fetchMetadata().await()
+                        metadata = try self.appauth.fetchMetadata().await()
                     }
-                    self.state!.metadata = metadata
+                    self.state.metadata = metadata
                 }
                 
                 // Then trigger a redirect to sign the user in
-                let authorizationResponse = try self.appauth!.performAuthorizationRedirect(
+                let authorizationResponse = try self.appauth.performAuthorizationRedirect(
                     metadata: metadata!,
                     clientID: registrationResponse.clientID,
-                    scope: self.config!.scope,
+                    scope: self.config.scope,
                     viewController: self.getViewController(),
                     force: self.isForcedLogin()
                 ).await()
@@ -85,16 +75,16 @@ class UnauthenticatedViewModel: ObservableObject {
                     var tokenResponse: OIDTokenResponse? = nil
                     try DispatchQueue.global().await {
                         
-                        tokenResponse = try self.appauth!.redeemCodeForTokens(
+                        tokenResponse = try self.appauth.redeemCodeForTokens(
                             clientSecret: registrationResponse.clientSecret,
                             authResponse: authorizationResponse!
                             
                         ).await()
                     }
                     
-                    self.state!.saveTokens(tokenResponse: tokenResponse!)
-                    self.state!.isFirstRun = false
-                    self.onLoggedIn!()
+                    self.state.saveTokens(tokenResponse: tokenResponse!)
+                    self.state.isFirstRun = false
+                    self.onLoggedIn()
                 }
 
             } catch {
@@ -114,14 +104,14 @@ class UnauthenticatedViewModel: ObservableObject {
     private func isForcedLogin() -> Bool {
 
         // On the first run the user authenticates to register and then single signs on
-        if self.state!.isFirstRun {
+        if self.state.isFirstRun {
             return false
         }
 
         // Demonstrate an approach if cookies become stuck in the in app browser window
         // Our force login logic will run it the user is logged out, which is true when there is no ID token
         // https://github.com/openid/AppAuth-iOS/issues/542
-        if self.state!.idToken == nil {
+        if self.state.idToken == nil {
             return true
         }
         

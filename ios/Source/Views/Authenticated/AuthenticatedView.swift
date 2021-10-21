@@ -27,8 +27,8 @@ struct AuthenticatedView: View {
     var body: some View {
     
         let deviceWidth = UIScreen.main.bounds.size.width
-        let refreshEnabled = self.model.isLoaded && self.model.hasRefreshToken
-        let signOutEnabled = self.model.isLoaded && self.model.hasIdToken
+        let refreshEnabled = self.model.hasRefreshToken
+        let signOutEnabled = self.model.hasIdToken
 
         return VStack {
             

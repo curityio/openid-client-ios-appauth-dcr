@@ -20,35 +20,24 @@ import AppAuth
 
 class RegistrationViewModel: ObservableObject {
 
-    private var config: ApplicationConfig?
-    private var state: ApplicationStateManager?
-    private var appauth: AppAuthHandler?
-    private var onRegistered: (() -> Void)?
+    private let config: ApplicationConfig
+    private let state: ApplicationStateManager
+    private let appauth: AppAuthHandler
+    private let onRegistered: (() -> Void)
 
-    @Published var isLoaded: Bool
     @Published var error: ApplicationError?
     
-    init() {
-
-        self.config = nil
-        self.state = nil
-        self.appauth = nil
-        self.onRegistered = nil
-        self.error = nil
-        self.isLoaded = false
-    }
-
-    func load(
-        config: ApplicationConfig?,
+    init(
+        config: ApplicationConfig,
         state: ApplicationStateManager,
-        appauth: AppAuthHandler?,
+        appauth: AppAuthHandler,
         onRegistered: @escaping () -> Void) {
-        
+            
         self.config = config
         self.state = state
         self.appauth = appauth
         self.onRegistered = onRegistered
-        self.isLoaded = true
+        self.error = nil
     }
 
     /*
@@ -65,14 +54,14 @@ class RegistrationViewModel: ObservableObject {
                 self.error = nil
                 var metadata: OIDServiceConfiguration? = nil
                 try DispatchQueue.global().await {
-                    metadata = try self.appauth!.fetchMetadata().await()
+                    metadata = try self.appauth.fetchMetadata().await()
                 }
-                self.state!.metadata = metadata
+                self.state.metadata = metadata
 
                 // Perform the code flow redirect for the initial sign in with a DCR scope
-                let authorizationResponse = try self.appauth!.performAuthorizationRedirect(
+                let authorizationResponse = try self.appauth.performAuthorizationRedirect(
                     metadata: metadata!,
-                    clientID: self.config!.registrationClientID,
+                    clientID: self.config.registrationClientID,
                     scope: "dcr",
                     viewController: self.getViewController(),
                     force: true
@@ -85,7 +74,7 @@ class RegistrationViewModel: ObservableObject {
                     var tokenResponse: OIDTokenResponse? = nil
                     try DispatchQueue.global().await {
 
-                        tokenResponse = try self.appauth!.redeemCodeForTokens(clientSecret: nil, authResponse: authorizationResponse!)
+                        tokenResponse = try self.appauth.redeemCodeForTokens(clientSecret: nil, authResponse: authorizationResponse!)
                             .await()
                     }
                     dcrAccessToken = tokenResponse?.accessToken
@@ -94,13 +83,13 @@ class RegistrationViewModel: ObservableObject {
                     var registrationResponse: OIDRegistrationResponse? = nil
                     try DispatchQueue.global().await {
 
-                        registrationResponse = try self.appauth!.registerClient(metadata: metadata!, accessToken: dcrAccessToken!)
+                        registrationResponse = try self.appauth.registerClient(metadata: metadata!, accessToken: dcrAccessToken!)
                             .await()
                     }
-                    self.state!.saveRegistration(registrationResponse: registrationResponse!)
+                    self.state.saveRegistration(registrationResponse: registrationResponse!)
 
                     // Tell the main view to update
-                    self.onRegistered!()
+                    self.onRegistered()
                 }
 
             } catch {

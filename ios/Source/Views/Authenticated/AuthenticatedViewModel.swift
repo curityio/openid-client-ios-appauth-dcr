@@ -21,10 +21,10 @@ import SwiftJWT
 
 class AuthenticatedViewModel: ObservableObject {
 
-    private var config: ApplicationConfig?
-    private var state: ApplicationStateManager?
-    private var appauth: AppAuthHandler?
-    private var onLoggedOut: (() -> Void)?
+    private let config: ApplicationConfig
+    private let state: ApplicationStateManager
+    private let appauth: AppAuthHandler
+    private let onLoggedOut: (() -> Void)
 
     @Published var hasRefreshToken: Bool
     @Published var hasIdToken: Bool
@@ -32,37 +32,28 @@ class AuthenticatedViewModel: ObservableObject {
     @Published var accessToken: String
     @Published var refreshToken: String
     @Published var error: ApplicationError?
-    @Published var isLoaded: Bool
 
     struct IDTokenClaims: Claims {
         var sub: String
     }
     
-    init() {
-        self.config = nil
-        self.state = nil
-        self.appauth = nil
-        self.onLoggedOut = nil
+    init(
+        config: ApplicationConfig,
+        state: ApplicationStateManager,
+        appauth: AppAuthHandler,
+        onLoggedOut: @escaping () -> Void) {
+            
+        
+        self.config = config
+        self.state = state
+        self.appauth = appauth
+        self.onLoggedOut = onLoggedOut
         self.hasRefreshToken = false
         self.hasIdToken = false
         self.subject = ""
         self.accessToken = ""
         self.refreshToken = ""
         self.error = nil
-        self.isLoaded = false
-    }
-    
-    func load(
-        config: ApplicationConfig,
-        state: ApplicationStateManager,
-        appauth: AppAuthHandler,
-        onLoggedOut: @escaping () -> Void) {
-    
-        self.config = config
-        self.state = state
-        self.appauth = appauth
-        self.onLoggedOut = onLoggedOut
-        self.isLoaded = true
     }
     
     /*
@@ -70,18 +61,18 @@ class AuthenticatedViewModel: ObservableObject {
      */
     func processTokens() {
 
-        if self.state!.tokenResponse?.accessToken != nil {
-            self.accessToken = self.state!.tokenResponse!.accessToken!
+        if self.state.tokenResponse?.accessToken != nil {
+            self.accessToken = self.state.tokenResponse!.accessToken!
         }
 
-        if self.state!.tokenResponse?.refreshToken != nil {
+        if self.state.tokenResponse?.refreshToken != nil {
             self.hasRefreshToken = true
-            self.refreshToken = self.state!.tokenResponse!.refreshToken!
+            self.refreshToken = self.state.tokenResponse!.refreshToken!
         }
         
-        if self.state!.idToken != nil {
+        if self.state.idToken != nil {
             
-            let idToken = self.state!.idToken!
+            let idToken = self.state.idToken!
             self.hasIdToken = true
             
             do {
@@ -107,15 +98,15 @@ class AuthenticatedViewModel: ObservableObject {
 
             do {
 
-                let metadata = self.state!.metadata!
-                let registrationResponse = self.state!.registrationResponse!
-                let refreshToken = self.state!.tokenResponse!.refreshToken!
+                let metadata = self.state.metadata!
+                let registrationResponse = self.state.registrationResponse!
+                let refreshToken = self.state.tokenResponse!.refreshToken!
                 var tokenResponse: OIDTokenResponse? = nil
                 self.error = nil
 
                 try DispatchQueue.global().await {
 
-                    tokenResponse = try self.appauth!.refreshAccessToken(
+                    tokenResponse = try self.appauth.refreshAccessToken(
                         metadata: metadata,
                         clientID: registrationResponse.clientID,
                         clientSecret: registrationResponse.clientSecret!,
@@ -123,11 +114,11 @@ class AuthenticatedViewModel: ObservableObject {
                 }
                 
                 if tokenResponse != nil {
-                    self.state!.saveTokens(tokenResponse: tokenResponse!)
+                    self.state.saveTokens(tokenResponse: tokenResponse!)
                     self.processTokens()
                 } else {
-                    self.state!.clearTokens()
-                    self.onLoggedOut!()
+                    self.state.clearTokens()
+                    self.onLoggedOut()
                 }
 
             } catch {
@@ -151,14 +142,14 @@ class AuthenticatedViewModel: ObservableObject {
 
                 self.error = nil
 
-                try self.appauth!.performEndSessionRedirect(
-                    metadata: self.state!.metadata!,
-                    idToken: self.state!.idToken!,
+                try self.appauth.performEndSessionRedirect(
+                    metadata: self.state.metadata!,
+                    idToken: self.state.idToken!,
                     viewController: self.getViewController()
                 ).await()
 
-                self.state!.clearTokens()
-                self.onLoggedOut!()
+                self.state.clearTokens()
+                self.onLoggedOut()
 
             } catch {
                 

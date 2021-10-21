@@ -26,7 +26,7 @@ struct RegistrationView: View {
     
     var body: some View {
 
-        let isEnabled = self.model.isLoaded
+        let isEnabled = true
         return VStack {
 
             if self.model.error != nil {

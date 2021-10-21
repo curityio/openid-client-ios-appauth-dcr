@@ -34,24 +34,13 @@ struct MainView: View {
                 .padding(.leading, 20)
             
             if (!self.model.isRegistered) {
-                RegistrationView(model: self.model.registrationModel)
+                RegistrationView(model: self.model.getRegistrationViewModel())
             }
             else if (!self.model.isAuthenticated) {
-                UnauthenticatedView(model: self.model.unauthenticatedModel)
+                UnauthenticatedView(model: self.model.getUnauthenticatedViewModel())
             } else {
-                AuthenticatedView(model: self.model.authenticatedModel)
+                AuthenticatedView(model: self.model.getAuthenticatedViewModel())
             }
-        }
-        .onAppear(perform: self.onViewCreated)
-    }
-    
-    func onViewCreated() {
-        
-        do {
-            try self.model.load()
-
-        } catch {
-            print("** Application load error: \(error)")
         }
     }
 }

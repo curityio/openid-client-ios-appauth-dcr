@@ -19,37 +19,61 @@ import SwiftCoroutine
 
 class MainViewModel: ObservableObject {
 
-    var config: ApplicationConfig?
-    var state: ApplicationStateManager?
-    var appauth: AppAuthHandler?
+    private let config: ApplicationConfig
+    private let state: ApplicationStateManager
+    private let appauth: AppAuthHandler
+    private var registrationModel: RegistrationViewModel?
+    private var unauthenticatedModel: UnauthenticatedViewModel?
+    private var authenticatedModel: AuthenticatedViewModel?
+    
     @Published var isRegistered = false
     @Published var isAuthenticated = false
 
-    let registrationModel: RegistrationViewModel
-    let unauthenticatedModel: UnauthenticatedViewModel
-    let authenticatedModel: AuthenticatedViewModel
-
     init() {
 
-        self.config = nil
-        self.appauth = nil
-        self.isRegistered = true
-
-        self.registrationModel = RegistrationViewModel()
-        self.unauthenticatedModel = UnauthenticatedViewModel()
-        self.authenticatedModel = AuthenticatedViewModel()
+        self.config = try! ApplicationConfigLoader.load()
+        self.state = ApplicationStateManager()
+        self.appauth = AppAuthHandler(config: self.config)
+        self.isRegistered = self.state.registrationResponse != nil
     }
     
-    func load() throws {
+    func getRegistrationViewModel() -> RegistrationViewModel {
+        
+        if self.registrationModel == nil {
+            self.registrationModel = RegistrationViewModel(
+                config: self.config,
+                state: self.state,
+                appauth: self.appauth,
+                onRegistered: self.onRegistered)
+        }
+    
+        return self.registrationModel!
+    }
 
-        self.config = try ApplicationConfigLoader.load()
-        self.state = ApplicationStateManager()
-        self.appauth = AppAuthHandler(config: self.config!)
-        self.isRegistered = self.state!.registrationResponse != nil
-
-        self.registrationModel.load(config: self.config, state: self.state!, appauth: self.appauth, onRegistered: self.onRegistered)
-        self.unauthenticatedModel.load(config: self.config!, state: self.state!, appauth: self.appauth!, onLoggedIn: self.onLoggedIn)
-        self.authenticatedModel.load(config: self.config!, state: self.state!, appauth: self.appauth!, onLoggedOut: self.onLoggedOut)
+    func getUnauthenticatedViewModel() -> UnauthenticatedViewModel {
+        
+        if self.unauthenticatedModel == nil {
+            self.unauthenticatedModel = UnauthenticatedViewModel(
+                config: self.config,
+                state: self.state,
+                appauth: self.appauth,
+                onLoggedIn: self.onLoggedIn)
+        }
+    
+        return self.unauthenticatedModel!
+    }
+    
+    func getAuthenticatedViewModel() -> AuthenticatedViewModel {
+        
+        if self.authenticatedModel == nil {
+            self.authenticatedModel = AuthenticatedViewModel(
+                config: self.config,
+                state: self.state,
+                appauth: self.appauth,
+                onLoggedOut: self.onLoggedOut)
+        }
+    
+        return self.authenticatedModel!
     }
 
     func onRegistered() {
