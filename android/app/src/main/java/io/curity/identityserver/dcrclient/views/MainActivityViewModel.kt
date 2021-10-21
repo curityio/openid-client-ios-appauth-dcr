@@ -16,27 +16,23 @@
 
 package io.curity.identityserver.dcrclient.views
 
+import android.app.Application
 import android.content.Context
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import io.curity.identityserver.dcrclient.AppAuthHandler
 import io.curity.identityserver.dcrclient.ApplicationStateManager
 import io.curity.identityserver.dcrclient.configuration.ApplicationConfig
 import io.curity.identityserver.dcrclient.configuration.ApplicationConfigLoader
-import java.lang.ref.WeakReference
 
-class MainActivityViewModel() : ViewModel() {
+class MainActivityViewModel(private val app: Application) : AndroidViewModel(app) {
 
-    lateinit var context: WeakReference<Context>
-    lateinit var config: ApplicationConfig
-    lateinit var state: ApplicationStateManager
-    lateinit var appauth: AppAuthHandler
+    val config: ApplicationConfig = ApplicationConfigLoader().load(this.app.applicationContext)
 
-    fun initialize(activity: WeakReference<Context>) {
-        this.context = activity
-        this.config = ApplicationConfigLoader().load(this.context.get()!!)
-        this.state = ApplicationStateManager(context)
-        this.appauth = AppAuthHandler(this.config, this.context.get()!!)
-    }
+    val appauth: AppAuthHandler = AppAuthHandler(this.config, this.app.applicationContext)
+
+    val state = ApplicationStateManager(
+        this.app.baseContext.getSharedPreferences("authState", Context.MODE_PRIVATE)
+    )
 
     fun isRegistered(): Boolean {
         return this.state.registrationResponse != null;

@@ -17,10 +17,8 @@
 package io.curity.identityserver.dcrclient
 
 import android.content.ContentValues
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.util.Log
-import java.lang.ref.WeakReference
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.RegistrationResponse
@@ -30,7 +28,7 @@ import net.openid.appauth.TokenResponse
  * Wraps the AuthState class from the AppAuth library
  * Some or all of the auth state can be persisted to a secure location such as Encrypted Shared Preferences
  */
-class ApplicationStateManager(private val context: WeakReference<Context>) {
+class ApplicationStateManager(private val sharedPreferences: SharedPreferences) {
 
     private var authState: AuthState? = null
     var idToken: String? = null
@@ -41,12 +39,10 @@ class ApplicationStateManager(private val context: WeakReference<Context>) {
      */
     init {
 
-        // Delete the existing registration settings during development if required
+        // During development, when the database is recreated, this can be used to delete old registrations from shared preferences
         // deleteRegistration()
 
-        val prefs = this.context.get()!!.getSharedPreferences("authState", MODE_PRIVATE)
-        val registration = prefs.getString("registration", null)
-
+        val registration = this.sharedPreferences.getString("registration", null)
         if (registration != null) {
             val lastRegistrationResponse = RegistrationResponse.jsonDeserialize(registration)
             this.authState = AuthState(lastRegistrationResponse)
@@ -90,16 +86,14 @@ class ApplicationStateManager(private val context: WeakReference<Context>) {
     fun saveRegistration(registrationResponse: RegistrationResponse) {
 
         this.authState?.update(registrationResponse)
-        val prefs = this.context.get()!!.getSharedPreferences("authState", MODE_PRIVATE)
-        prefs.edit()
+        this.sharedPreferences.edit()
             .putString("registration", this.authState!!.lastRegistrationResponse!!.jsonSerializeString())
             .apply()
     }
 
     private fun deleteRegistration() {
 
-        val prefs = this.context.get()!!.getSharedPreferences("authState", MODE_PRIVATE)
-        prefs.edit()
+        this.sharedPreferences.edit()
             .remove("registration")
             .apply()
     }

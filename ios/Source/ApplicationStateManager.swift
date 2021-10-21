@@ -32,7 +32,7 @@ class ApplicationStateManager {
         
         // During development you can force a new registration by deleting existing settings
         // This can be required if you have redeployed the Identity Server and reset its data
-        // KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".registration")
+        KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".registration")
         
         self.authState = OIDAuthState(authorizationResponse: nil, tokenResponse: nil, registrationResponse: nil)
         self.isFirstRun = true
@@ -67,6 +67,9 @@ class ApplicationStateManager {
         }
     
         self.authState?.update(with: tokenResponse, error: nil)
+        
+        /* Tokens can be optionally stored in mobile secure storage, though this may not be appropriate for high security apps
+         */
     }
     
     /*

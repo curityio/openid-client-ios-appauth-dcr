@@ -21,10 +21,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.NavHostFragment
-import io.curity.identityserver.dcrclient.ApplicationStateManager
 import io.curity.identityserver.dcrclient.R
 import io.curity.identityserver.dcrclient.databinding.ActivityMainBinding
-import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,8 +33,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val model: MainActivityViewModel by viewModels()
-        model.initialize(WeakReference(this))
-
         this.binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         this.binding.model = model
 
