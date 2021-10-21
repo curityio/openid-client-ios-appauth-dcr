@@ -33,7 +33,7 @@ fi
 # Next deploy the Curity Identity server
 #
 cd idsvr
-docker compose up --detach --force-recreate
+docker compose --project-name appauth-dcr up --detach --force-recreate
 if [ $? -ne 0 ]; then
   echo "Problem encountered starting Docker components"
   exit 1
