@@ -18,7 +18,6 @@ package io.curity.identityserver.dcrclient.views.unauthenticated;
 
 import android.content.Intent
 import androidx.databinding.BaseObservable
-import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,7 +32,7 @@ import io.curity.identityserver.dcrclient.errors.ApplicationException
 import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 
 class UnauthenticatedFragmentViewModel(
-    private val events: WeakReference<UnauthenticatedFragmentEvents>,
+    private val events: UnauthenticatedFragmentEvents,
     private val config: ApplicationConfig,
     private val state: ApplicationStateManager,
     private val appauth: AppAuthHandler,
@@ -68,7 +67,7 @@ class UnauthenticatedFragmentViewModel(
                         that.isForcedLogin()
                     )
 
-                    that.events.get()?.startLoginRedirect(intent)
+                    that.events.startLoginRedirect(intent)
                 }
 
             } catch (ex: ApplicationException) {
@@ -109,7 +108,7 @@ class UnauthenticatedFragmentViewModel(
                     withContext(Dispatchers.Main) {
                         that.state.isFirstRun = false
                         that.state.saveTokens(tokenResponse!!)
-                        events.get()?.onLoggedIn()
+                        events.onLoggedIn()
                     }
 
                 } catch (ex: ApplicationException) {

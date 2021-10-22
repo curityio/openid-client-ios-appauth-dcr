@@ -20,7 +20,6 @@ import android.content.ContentValues
 import android.content.Intent
 import android.util.Log
 import androidx.databinding.BaseObservable
-import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,7 +36,7 @@ import io.curity.identityserver.dcrclient.errors.InvalidIdTokenException
 import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 
 class AuthenticatedFragmentViewModel(
-    private val events: WeakReference<AuthenticatedFragmentEvents>,
+    private val events: AuthenticatedFragmentEvents,
     private val state: ApplicationStateManager,
     private val appauth: AppAuthHandler,
     val error: ErrorFragmentViewModel) : BaseObservable() {
@@ -100,7 +99,7 @@ class AuthenticatedFragmentViewModel(
                         that.processTokens()
                     } else {
                         that.state.clearTokens()
-                        events.get()?.onLoggedOut()
+                        events.onLoggedOut()
                     }
                 }
 
@@ -116,13 +115,12 @@ class AuthenticatedFragmentViewModel(
     fun startLogout() {
 
         this.error.clearDetails()
-        val registrationResponse = this.state.registrationResponse!!
 
         val intent = appauth.getEndSessionRedirectIntent(
             this.state.metadata!!,
             this.state.idToken)
 
-        this.events.get()?.startLogoutRedirect(intent)
+        this.events.startLogoutRedirect(intent)
     }
 
     fun endLogout(data: Intent) {
@@ -130,7 +128,7 @@ class AuthenticatedFragmentViewModel(
         try {
             this.appauth.handleEndSessionResponse(AuthorizationException.fromIntent(data))
             this.state.clearTokens()
-            this.events.get()?.onLoggedOut()
+            this.events.onLoggedOut()
 
         } catch (ex: ApplicationException) {
             this.error.setDetails(ex)

@@ -25,7 +25,6 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import java.lang.ref.WeakReference
 import io.curity.identityserver.dcrclient.databinding.FragmentAuthenticatedBinding
 import io.curity.identityserver.dcrclient.views.MainActivity
 import io.curity.identityserver.dcrclient.views.MainActivityViewModel
@@ -52,7 +51,7 @@ class AuthenticatedFragment : androidx.fragment.app.Fragment(), AuthenticatedFra
 
         this.binding = FragmentAuthenticatedBinding.inflate(inflater, container, false)
         this.binding.model = AuthenticatedFragmentViewModel(
-            WeakReference(this),
+            this,
             mainViewModel.state,
             mainViewModel.appauth,
             errorViewModel)

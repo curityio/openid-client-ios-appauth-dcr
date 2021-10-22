@@ -18,7 +18,6 @@ package io.curity.identityserver.dcrclient.views.registration;
 
 import android.content.Intent
 import androidx.databinding.BaseObservable
-import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,7 +32,7 @@ import io.curity.identityserver.dcrclient.errors.ApplicationException
 import io.curity.identityserver.dcrclient.views.error.ErrorFragmentViewModel
 
 class RegistrationFragmentViewModel(
-    private val events: WeakReference<RegistrationFragmentEvents>,
+    private val events: RegistrationFragmentEvents,
     private val config: ApplicationConfig,
     private val state: ApplicationStateManager,
     private val appauth: AppAuthHandler,
@@ -67,7 +66,7 @@ class RegistrationFragmentViewModel(
                         true
                     )
 
-                    that.events.get()?.startLoginRedirect(intent)
+                    that.events.startLoginRedirect(intent)
                 }
 
             } catch (ex: ApplicationException) {
@@ -112,7 +111,7 @@ class RegistrationFragmentViewModel(
                     withContext(Dispatchers.Main) {
                         that.state.metadata = metadata
                         that.state.saveRegistration(registrationResponse!!)
-                        events.get()?.onRegistered()
+                        events.onRegistered()
                     }
 
                 } catch (ex: ApplicationException) {
