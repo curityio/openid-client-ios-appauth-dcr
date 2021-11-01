@@ -1,6 +1,6 @@
 # AppAuth with Dynamic Client Registration
 
-An extended iOS AppAuth sample using authenticated Dynamic Client Registration.\
+An extended iOS AppAuth code example using authenticated Dynamic Client Registration.\
 This improves the mobile app's security as described in [Mobile Best Practices](https://curity.io/resources/learn/oauth-for-mobile-apps-best-practices/).
 
 ## Code Example Article
