@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SwiftCoroutine
 import AppAuth
 
 class RegistrationViewModel: ObservableObject {
@@ -103,7 +102,8 @@ class RegistrationViewModel: ObservableObject {
     }
     
     private func getViewController() -> UIViewController {
-        return UIApplication.shared.windows.first!.rootViewController!
+        let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        return scene!.keyWindow!.rootViewController!
     }
 }
 

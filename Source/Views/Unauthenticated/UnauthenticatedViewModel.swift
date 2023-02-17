@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SwiftCoroutine
 import AppAuth
 
 class UnauthenticatedViewModel: ObservableObject {
@@ -95,10 +94,6 @@ class UnauthenticatedViewModel: ObservableObject {
                 }
             }
         }
-    }
-
-    private func getViewController() -> UIViewController {
-        return UIApplication.shared.windows.first!.rootViewController!
     }
 
     private func isForcedLogin() -> Bool {

@@ -15,12 +15,13 @@
 //
 
 import AppAuth
-import SwiftCoroutine
 
 class AppAuthHandler {
     
     private let config: ApplicationConfig
     private var userAgentSession: OIDExternalUserAgentSession?
+    private var loginResponseHandler: LoginResponseHandler?
+    private var logoutResponseHandler: LogoutResponseHandler?
     
     init(config: ApplicationConfig) {
         self.config = config
@@ -30,40 +31,37 @@ class AppAuthHandler {
     /*
      * Get OpenID Connect endpoints and ensure that dynamic client registration is configured
      */
-    func fetchMetadata() throws -> CoFuture<OIDServiceConfiguration> {
+    func fetchMetadata() async throws -> OIDServiceConfiguration {
         
-        let promise = CoPromise<OIDServiceConfiguration>()
-        
-        let (issuerUrl, parseError) = self.config.getIssuerUri()
-        if issuerUrl == nil {
-            promise.fail(parseError!)
-            return promise
-        }
+        let issuerUrl = try self.config.getIssuerUri()
 
-        OIDAuthorizationService.discoverConfiguration(forIssuer: issuerUrl!) { metadata, ex in
-
-            if metadata != nil {
+        return try await withCheckedThrowingContinuation { continuation in
+            
+            OIDAuthorizationService.discoverConfiguration(forIssuer: issuerUrl) { metadata, ex in
                 
-                if (metadata!.registrationEndpoint == nil) {
+                if metadata != nil {
+                    
+                    if (metadata!.registrationEndpoint == nil) {
+                        
+                        let configurationError = ApplicationError(
+                            title: "Invalid Configuration Error",
+                            description: "No registration endpoint is configured in the Identity Server"
+                        )
+                        continuation.resume(throwing: configurationError)
 
-                    let configurationError = ApplicationError(
-                        title: "Invalid Configuration Error",
-                        description: "No registration endpoint is configured in the Identity Server"
-                    )
-                    promise.fail(configurationError)
+                    } else {
+                        
+                        Logger.info(data: "Metadata retrieved successfully")
+                        continuation.resume(returning: metadata!)
+                    }
+                    
+                } else {
+                    
+                    let error = self.createAuthorizationError(title: "Metadata Download Error", ex: ex)
+                    continuation.resume(throwing: error)
                 }
-
-                Logger.info(data: "Metadata retrieved successfully")
-                promise.success(metadata!)
-
-            } else {
-
-                let error = self.createAuthorizationError(title: "Metadata Download Error", ex: ex)
-                promise.fail(error)
             }
         }
-        
-        return promise
     }
 
     /*
@@ -75,15 +73,9 @@ class AppAuthHandler {
         clientID: String,
         scope: String,
         viewController: UIViewController,
-        force: Bool) -> CoFuture<OIDAuthorizationResponse?> {
+        force: Bool) throws {
         
-        let promise = CoPromise<OIDAuthorizationResponse?>()
-        
-        let (redirectUri, parseError) = self.config.getRedirectUri()
-        if redirectUri == nil {
-            promise.fail(parseError!)
-            return promise
-        }
+        let redirectUri = try self.config.getRedirectUri()
 
         // Use acr_values to select a particular authentication method at runtime
         var extraParams = [String: String]()
@@ -98,37 +90,38 @@ class AppAuthHandler {
             clientId: clientID,
             clientSecret: nil,
             scopes: scopesArray,
-            redirectURL: redirectUri!,
+            redirectURL: redirectUri,
             responseType: OIDResponseTypeCode,
             additionalParameters: extraParams)
-
-            let userAgent = OIDExternalUserAgentIOS(presenting: viewController)
-            self.userAgentSession = OIDAuthorizationService.present(request, externalUserAgent: userAgent!) { response, ex in
-
-            if response != nil {
-                
-                Logger.info(data: "Authorization response received successfully")
-                promise.success(response!)
-
-            } else {
-                
-                if ex != nil && self.isUserCancellationErrorCode(ex: ex!) {
-                    
-                    Logger.info(data: "User cancelled the ASWebAuthenticationSession window")
-                    promise.success(nil)
-
-                } else {
-
-                    
-                    let error = self.createAuthorizationError(title: "Authorization Request Error", ex: ex)
-                    promise.fail(error)
-                }
-            }
-
-            self.userAgentSession = nil
-        }
+            
+        let userAgent = OIDExternalUserAgentIOS(presenting: viewController)
+        self.loginResponseHandler = LoginResponseHandler()
+        self.userAgentSession = OIDAuthorizationService.present(
+            request,
+            externalUserAgent: userAgent!,
+            callback: self.loginResponseHandler!.callback)
+    }
+    
+    /*
+     * Finish processing, which occurs on a worker thread
+     */
+    func handleAuthorizationResponse() async throws -> OIDAuthorizationResponse? {
         
-        return promise
+        do {
+            
+            let response = try await self.loginResponseHandler!.waitForCallback()
+            self.loginResponseHandler = nil
+            return response
+
+        } catch {
+            
+            self.loginResponseHandler = nil
+            if (self.isUserCancellationErrorCode(ex: error)) {
+                return nil
+            }
+            
+            throw self.createAuthorizationError(title: "Authorization Request Error", ex: error)
+        }
     }
     
     /*
@@ -136,47 +129,40 @@ class AppAuthHandler {
      */
     func redeemCodeForTokens(
         clientSecret: String?,
-        authResponse: OIDAuthorizationResponse) -> CoFuture<OIDTokenResponse> {
+        authResponse: OIDAuthorizationResponse) async throws -> OIDTokenResponse {
 
-        let promise = CoPromise<OIDTokenResponse>()
-
-        var extraParams = [String: String]()
-        if clientSecret != nil {
-            extraParams["client_secret"] = clientSecret
-        }
-        let request = authResponse.tokenExchangeRequest(withAdditionalParameters: extraParams)
-
-        OIDAuthorizationService.perform(
-            request!,
-            originalAuthorizationResponse: authResponse) { tokenResponse, ex in
-
-            if tokenResponse != nil {
-
-                Logger.info(data: "Authorization code grant response received successfully")
-                promise.success(tokenResponse!)
-
-            } else {
-
-                let error = self.createAuthorizationError(title: "Authorization Response Error", ex: ex)
-                promise.fail(error)
+        try await withCheckedThrowingContinuation { continuation in
+            
+            var extraParams = [String: String]()
+            if clientSecret != nil {
+                extraParams["client_secret"] = clientSecret
+            }
+            let request = authResponse.tokenExchangeRequest(withAdditionalParameters: extraParams)
+            
+            OIDAuthorizationService.perform(
+                request!,
+                originalAuthorizationResponse: authResponse) { tokenResponse, ex in
+                    
+                if tokenResponse != nil {
+                    
+                    Logger.info(data: "Authorization code grant response received successfully")
+                    continuation.resume(returning: tokenResponse!)
+                    
+                } else {
+                    
+                    let error = self.createAuthorizationError(title: "Authorization Response Error", ex: ex)
+                    continuation.resume(throwing: error)
+                }
             }
         }
-        
-        return promise
     }
     
     /*
      * Perform dynamic client registration and then store the response
      */
-    func registerClient(metadata: OIDServiceConfiguration, accessToken: String) -> CoFuture<OIDRegistrationResponse> {
+    func registerClient(metadata: OIDServiceConfiguration, accessToken: String) async throws -> OIDRegistrationResponse {
         
-        let promise = CoPromise<OIDRegistrationResponse>()
-        
-        let (redirectUri, parseError) = self.config.getRedirectUri()
-        if redirectUri == nil {
-            promise.fail(parseError!)
-            return promise
-        }
+        let redirectUri = try self.config.getRedirectUri()
         
         var extraParams = [String: String]()
         extraParams["scope"] = self.config.scope
@@ -185,32 +171,33 @@ class AppAuthHandler {
 
         let nonTemplatizedRequest = OIDRegistrationRequest(
             configuration: metadata,
-            redirectURIs: [redirectUri!],
+            redirectURIs: [redirectUri],
             responseTypes: nil,
             grantTypes: [OIDGrantTypeAuthorizationCode],
             subjectType: nil,
             tokenEndpointAuthMethod: "client_secret_basic",
             initialAccessToken: accessToken,
             additionalParameters: extraParams)
-
-        OIDAuthorizationService.perform(nonTemplatizedRequest) { response, ex in
+        
+        return try await withCheckedThrowingContinuation { continuation in
             
-            if response != nil {
+            OIDAuthorizationService.perform(nonTemplatizedRequest) { response, ex in
                 
-                let registrationResponse = response!
-                let clientSecret = registrationResponse.clientSecret == nil ? "" : registrationResponse.clientSecret!
-                Logger.info(data: "Registration data retrieved successfully")
-                Logger.debug(data: "Created dynamic client: ID: \(registrationResponse.clientID), Secret: \(clientSecret)")
-                promise.success(registrationResponse)
-
-            } else {
-                
-                let error = self.createAuthorizationError(title: "Registration Error", ex: ex)
-                promise.fail(error)
+                if response != nil {
+                    
+                    let registrationResponse = response!
+                    let clientSecret = registrationResponse.clientSecret == nil ? "" : registrationResponse.clientSecret!
+                    Logger.info(data: "Registration data retrieved successfully")
+                    Logger.debug(data: "Created dynamic client: ID: \(registrationResponse.clientID), Secret: \(clientSecret)")
+                    continuation.resume(returning: registrationResponse)
+                    
+                } else {
+                    
+                    let error = self.createAuthorizationError(title: "Registration Error", ex: ex)
+                    continuation.resume(throwing: error)
+                }
             }
         }
-        
-        return promise
     }
 
     /*
@@ -220,9 +207,7 @@ class AppAuthHandler {
             metadata: OIDServiceConfiguration,
             clientID: String,
             clientSecret: String,
-            refreshToken: String) -> CoFuture<OIDTokenResponse?> {
-        
-        let promise = CoPromise<OIDTokenResponse?>()
+            refreshToken: String) async throws -> OIDTokenResponse? {
         
         let request = OIDTokenRequest(
             configuration: metadata,
@@ -236,29 +221,30 @@ class AppAuthHandler {
             codeVerifier: nil,
             additionalParameters: nil)
         
-        OIDAuthorizationService.perform(request) { tokenResponse, ex in
-
-            if tokenResponse != nil {
-
-                Logger.info(data: "Refresh token code grant response received successfully")
-                promise.success(tokenResponse!)
-
-            } else {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<OIDTokenResponse?, Error>) -> Void in
+            
+            OIDAuthorizationService.perform(request) { tokenResponse, ex in
                 
-                if ex != nil && self.isRefreshTokenExpiredErrorCode(ex: ex!) {
+                if tokenResponse != nil {
                     
-                    Logger.info(data: "Refresh token expired and the user must re-authenticate")
-                    promise.success(nil)
-
+                    Logger.info(data: "Refresh token code grant response received successfully")
+                    continuation.resume(returning: tokenResponse!)
+                    
                 } else {
-
-                    let error = self.createAuthorizationError(title: "Refresh Token Error", ex: ex)
-                    promise.fail(error)
+                    
+                    if ex != nil && self.isRefreshTokenExpiredErrorCode(ex: ex!) {
+                        
+                        Logger.info(data: "Refresh token expired and the user must re-authenticate")
+                        continuation.resume(returning: nil)
+                        
+                    } else {
+                        
+                        let error = self.createAuthorizationError(title: "Refresh Token Error", ex: ex)
+                        continuation.resume(throwing: error)
+                    }
                 }
             }
         }
-        
-        return promise
     }
 
     /*
@@ -266,53 +252,45 @@ class AppAuthHandler {
      */
     func performEndSessionRedirect(metadata: OIDServiceConfiguration,
                                    idToken: String,
-                                   viewController: UIViewController) -> CoFuture<Void> {
+                                   viewController: UIViewController) throws {
         
-        let promise = CoPromise<Void>()
         let extraParams = [String: String]()
-
-        let (postLogoutRedirectUri, parseError) = self.config.getPostLogoutRedirectUri()
-        if postLogoutRedirectUri == nil {
-            promise.fail(parseError!)
-            return promise
-        }
+        let postLogoutRedirectUri = try self.config.getPostLogoutRedirectUri()
 
         let request = OIDEndSessionRequest(
             configuration: metadata,
             idTokenHint: idToken,
-            postLogoutRedirectURL: postLogoutRedirectUri!,
+            postLogoutRedirectURL: postLogoutRedirectUri,
             additionalParameters: extraParams)
 
         let userAgent = OIDExternalUserAgentIOS(presenting: viewController)
-        self.userAgentSession = OIDAuthorizationService.present(request, externalUserAgent: userAgent!) { response, ex in
-    
-            
-            if response != nil {
-                Logger.info(data: "End session response received successfully")
-            }
+        self.logoutResponseHandler = LogoutResponseHandler()
+        self.userAgentSession = OIDAuthorizationService.present(
+            request,
+            externalUserAgent: userAgent!,
+            callback: self.logoutResponseHandler!.callback)
+    }
 
-            if ex != nil {
-                
-                if self.isUserCancellationErrorCode(ex: ex!) {
-                
-                    Logger.info(data: "User cancelled the ASWebAuthenticationSession window")
-                    promise.success(Void())
-
-                } else {
-
-                    let error = self.createAuthorizationError(title: "End Session Error", ex: ex)
-                    promise.fail(error)
-                }
-
-            } else {
-                
-                promise.success(Void())
-            }
-    
-            self.userAgentSession = nil
-        }
+    /*
+     * Finish processing, which occurs on a worker thread
+     */
+    func handleEndSessionResponse() async throws -> OIDEndSessionResponse? {
         
-        return promise
+        do {
+            
+            let response = try await self.logoutResponseHandler!.waitForCallback()
+            self.logoutResponseHandler = nil
+            return response
+
+        } catch {
+            
+            self.logoutResponseHandler = nil
+            if (self.isUserCancellationErrorCode(ex: error)) {
+                return nil
+            }
+            
+            throw self.createAuthorizationError(title: "Logout Request Error", ex: error)
+        }
     }
 
     /*

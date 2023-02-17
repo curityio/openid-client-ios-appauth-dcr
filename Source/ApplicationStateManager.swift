@@ -30,7 +30,7 @@ class ApplicationStateManager {
      */
     init() {
         
-        // During development, when the database is recreated, this can be used to delete old registrations from shared preferences
+        // During development, when the database is recreated, this can be used to delete old registrations
         // KeychainWrapper.standard.removeObject(forKey: self.storageKey + ".registration")
         
         self.authState = OIDAuthState(authorizationResponse: nil, tokenResponse: nil, registrationResponse: nil)
