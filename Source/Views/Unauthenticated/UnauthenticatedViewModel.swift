@@ -104,9 +104,7 @@ class UnauthenticatedViewModel: ObservableObject {
             return false
         }
 
-        // Demonstrate an approach if cookies become stuck in the in app browser window
-        // Our force login logic will run it the user is logged out, which is true when there is no ID token
-        // https://github.com/openid/AppAuth-iOS/issues/542
+        // The app can also force its state to be logged out by clearing the ID token
         if self.state.idToken == nil {
             return true
         }
