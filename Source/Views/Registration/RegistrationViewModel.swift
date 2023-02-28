@@ -91,9 +91,11 @@ class RegistrationViewModel: ObservableObject {
             } catch {
 
                 // Handle errors on the UI thread
-                let appError = error as? ApplicationError
-                if appError != nil {
-                    self.error = appError!
+                await MainActor.run {
+                    let appError = error as? ApplicationError
+                    if appError != nil {
+                        self.error = appError!
+                    }
                 }
             }
         }
