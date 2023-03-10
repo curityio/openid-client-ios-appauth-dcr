@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SwiftCoroutine
 import AppAuth
 
 class UnauthenticatedViewModel: ObservableObject {
@@ -45,60 +44,57 @@ class UnauthenticatedViewModel: ObservableObject {
      */
     func startLogin() {
 
-        DispatchQueue.main.startCoroutine {
+        Task {
 
             do {
 
+                // First get metadata
                 self.error = nil
                 let registrationResponse = self.state.registrationResponse!
-                var metadata = self.state.metadata
-
-                // First get metadata if required
-                if metadata == nil {
-                    try DispatchQueue.global().await {
-                        metadata = try self.appauth.fetchMetadata().await()
-                    }
+                let metadata = try await self.appauth.fetchMetadata()
+                
+                // Redirect on the main thread, to sign the user in
+                try await MainActor.run {
+                    
                     self.state.metadata = metadata
+                    try self.appauth.performAuthorizationRedirect(
+                        metadata: metadata,
+                        clientID: registrationResponse.clientID,
+                        scope: self.config.scope,
+                        viewController: self.getViewController(),
+                        force: self.isForcedLogin()
+                    )
                 }
                 
-                // Then trigger a redirect to sign the user in
-                let authorizationResponse = try self.appauth.performAuthorizationRedirect(
-                    metadata: metadata!,
-                    clientID: registrationResponse.clientID,
-                    scope: self.config.scope,
-                    viewController: self.getViewController(),
-                    force: self.isForcedLogin()
-                ).await()
-
+                // Wait for the response
+                let authorizationResponse = try await self.appauth.handleAuthorizationResponse()
                 if authorizationResponse != nil {
                     
-                    var tokenResponse: OIDTokenResponse? = nil
-                    try DispatchQueue.global().await {
+                    let tokenResponse = try await self.appauth.redeemCodeForTokens(
+                        clientSecret: registrationResponse.clientSecret,
+                        authResponse: authorizationResponse!
                         
-                        tokenResponse = try self.appauth.redeemCodeForTokens(
-                            clientSecret: registrationResponse.clientSecret,
-                            authResponse: authorizationResponse!
-                            
-                        ).await()
-                    }
+                    )
                     
-                    self.state.saveTokens(tokenResponse: tokenResponse!)
-                    self.state.isFirstRun = false
-                    self.onLoggedIn()
+                    // Update state on the UI thread
+                    await MainActor.run {
+                        self.state.saveTokens(tokenResponse: tokenResponse)
+                        self.state.isFirstRun = false
+                        self.onLoggedIn()
+                    }
                 }
 
             } catch {
                 
-                let appError = error as? ApplicationError
-                if appError != nil {
-                    self.error = appError!
+                // Handle errors on the UI thread
+                await MainActor.run {
+                    let appError = error as? ApplicationError
+                    if appError != nil {
+                        self.error = appError!
+                    }
                 }
             }
         }
-    }
-
-    private func getViewController() -> UIViewController {
-        return UIApplication.shared.windows.first!.rootViewController!
     }
 
     private func isForcedLogin() -> Bool {
@@ -108,13 +104,16 @@ class UnauthenticatedViewModel: ObservableObject {
             return false
         }
 
-        // Demonstrate an approach if cookies become stuck in the in app browser window
-        // Our force login logic will run it the user is logged out, which is true when there is no ID token
-        // https://github.com/openid/AppAuth-iOS/issues/542
+        // The app can also force its state to be logged out by clearing the ID token
         if self.state.idToken == nil {
             return true
         }
         
         return false
+    }
+    
+    private func getViewController() -> UIViewController {
+        let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        return scene!.keyWindow!.rootViewController!
     }
 }
